@@ -129,7 +129,10 @@ export default function Mathler() {
   }, [gameState.gameWon, gameState.gameLost]);
 
   return (
-    <div className="container mx-auto px-4 py-8 max-w-lg" data-testid="mathler-game">
+    <div
+      className="container mx-auto px-4 py-8 max-w-lg"
+      data-testid="mathler-game"
+    >
       {/* Game Header */}
       <header
         className="text-center mb-6"
