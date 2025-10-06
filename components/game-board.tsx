@@ -84,9 +84,9 @@ export function GameBoard({
   };
 
   return (
-    <div className="mb-4 flex justify-center">
+    <div className="my-6 flex justify-center">
       <div
-        className="grid grid-rows-6 gap-2 mb-6 w-fit"
+        className="grid grid-rows-6 gap-2 w-fit"
         data-testid="game-board"
       >
         {Array.from({ length: 6 }).map((_, rowIndex) => renderRow(rowIndex))}
