@@ -84,6 +84,7 @@ export default function Numbler() {
           description:
             'Please enter a valid 5-character equation that can be calculated.',
           variant: 'destructive',
+          duration: 2000,
         });
         return prev;
       }
@@ -112,7 +113,7 @@ export default function Numbler() {
           toast({
             title: '🎉 Congratulations!',
             description: 'You solved it!',
-            duration: 5000,
+            duration: 2000,
           });
         }, 500);
       } else if (isLoss) {
@@ -121,7 +122,7 @@ export default function Numbler() {
             title: 'Game Over!',
             description: `The answer was: ${currentPuzzle.solution}`,
             variant: 'destructive',
-            duration: Infinity,
+            duration: 2000,
           });
         }, 500);
       } else {
