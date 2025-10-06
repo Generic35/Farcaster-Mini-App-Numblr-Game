@@ -11,28 +11,59 @@ export interface GameState {
   tileStates: TileState[][];
 }
 
-export const PUZZLES = [
-  // Easy puzzles
-  { target: 6, solution: "1+2+3" },
-  { target: 10, solution: "2*3+4" },
-  { target: 8, solution: "4+4+0" },
-  { target: 12, solution: "3*5-3" },
-  { target: 15, solution: "5*4-5" },
-  { target: 9, solution: "3*3*1" },
-  { target: 7, solution: "9-4+2" },
-  { target: 11, solution: "5+3+3" },
-  { target: 14, solution: "7*2+0" },
-  { target: 16, solution: "4*4*1" },
-];
+export const PUZZLES_BY_DIFFICULTY = {
+  easy: [
+    { target: 6, solution: "1+2+3" },
+    { target: 10, solution: "2*3+4" },
+    { target: 8, solution: "4+4+0" },
+    { target: 7, solution: "9-4+2" },
+    { target: 11, solution: "5+3+3" },
+    { target: 14, solution: "7*2+0" },
+    { target: 9, solution: "3*3+0" },
+    { target: 12, solution: "6+6+0" },
+    { target: 5, solution: "2+2+1" },
+    { target: 13, solution: "8+3+2" },
+  ],
+  medium: [
+    { target: 15, solution: "5*4-5" },
+    { target: 18, solution: "6*4-6" },
+    { target: 12, solution: "3*5-3" },
+    { target: 20, solution: "5*5-5" },
+    { target: 16, solution: "8*3-8" },
+    { target: 24, solution: "6*5-6" },
+    { target: 21, solution: "7*4-7" },
+    { target: 10, solution: "5*3-5" },
+    { target: 22, solution: "6*4-2" },
+    { target: 14, solution: "9+8-3" },
+  ],
+  hard: [
+    { target: 3, solution: "9/3+0" },
+    { target: 5, solution: "8/2+1" },
+    { target: 6, solution: "8/2+2" },
+    { target: 7, solution: "9/3+4" },
+    { target: 4, solution: "6/3+2" },
+    { target: 2, solution: "8/4+0" },
+    { target: 8, solution: "6/3+6" },
+    { target: 1, solution: "9-4-4" },
+    { target: 9, solution: "6/2+6" },
+    { target: 10, solution: "8/2+6" },
+  ],
+};
+
+export type Difficulty = 'easy' | 'medium' | 'hard';
+
+export function getPuzzlesByDifficulty(difficulty: Difficulty) {
+  return PUZZLES_BY_DIFFICULTY[difficulty];
+}
 
 export let CURRENT_PUZZLE_INDEX = 0;
-export let TARGET_NUMBER = PUZZLES[0].target;
-export let SOLUTION = PUZZLES[0].solution;
+export let TARGET_NUMBER = PUZZLES_BY_DIFFICULTY.easy[0].target;
+export let SOLUTION = PUZZLES_BY_DIFFICULTY.easy[0].solution;
 
 export function setCurrentPuzzle(index: number) {
-  CURRENT_PUZZLE_INDEX = index % PUZZLES.length;
-  TARGET_NUMBER = PUZZLES[CURRENT_PUZZLE_INDEX].target;
-  SOLUTION = PUZZLES[CURRENT_PUZZLE_INDEX].solution;
+  CURRENT_PUZZLE_INDEX = index % PUZZLES_BY_DIFFICULTY.easy.length;
+  TARGET_NUMBER = PUZZLES_BY_DIFFICULTY.easy[CURRENT_PUZZLE_INDEX].target;
+  SOLUTION = PUZZLES_BY_DIFFICULTY.easy[CURRENT_PUZZLE_INDEX].solution;
 }
 
 export const MAX_GUESSES = 6;

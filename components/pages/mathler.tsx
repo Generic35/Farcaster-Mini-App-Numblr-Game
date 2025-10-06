@@ -6,7 +6,8 @@ import { Keypad } from '@/components/keypad';
 import { useToast } from '@/hooks/use-toast';
 import {
   GameState,
-  PUZZLES,
+  Difficulty,
+  getPuzzlesByDifficulty,
   createInitialGameState,
   addCharacterToGuess,
   removeCharacterFromGuess,
@@ -14,26 +15,56 @@ import {
   getTileStates,
   checkWin,
   isValidCharacter,
-  setCurrentPuzzle,
 } from '@/lib/game-logic';
 
+// Get daily puzzle index based on day of month
+function getDailyPuzzleIndex() {
+  const today = new Date();
+  const dayOfMonth = today.getDate(); // 1-31
+  return dayOfMonth - 1; // 0-30 for array index
+}
+
+// Rotate difficulty: Easy → Medium → Hard → Easy...
+function getDifficultyForDay(dayIndex: number): Difficulty {
+  const difficulties: Difficulty[] = ['easy', 'medium', 'hard'];
+  return difficulties[dayIndex % 3];
+}
+
 export default function Numbler() {
-  const [puzzleIndex, setPuzzleIndex] = useState(0);
-  const [currentPuzzle, setCurrentPuzzleState] = useState(PUZZLES[0]);
+  const [currentDayIndex, setCurrentDayIndex] = useState(getDailyPuzzleIndex());
+  const [difficulty, setDifficulty] = useState<Difficulty>(
+    getDifficultyForDay(currentDayIndex)
+  );
+  const [puzzles, setPuzzles] = useState(getPuzzlesByDifficulty(difficulty));
+  const [puzzleIndex, setPuzzleIndex] = useState(
+    Math.floor(currentDayIndex / 3) % puzzles.length
+  );
+  const [currentPuzzle, setCurrentPuzzleState] = useState(
+    puzzles[Math.floor(currentDayIndex / 3) % puzzles.length]
+  );
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
   );
   const { toast } = useToast();
 
   const handleNextPuzzle = () => {
-    const nextIndex = (puzzleIndex + 1) % PUZZLES.length;
-    setPuzzleIndex(nextIndex);
-    setCurrentPuzzle(nextIndex);
-    setCurrentPuzzleState(PUZZLES[nextIndex]);
+    const nextDayIndex = currentDayIndex + 1;
+    const nextDifficulty = getDifficultyForDay(nextDayIndex);
+    const nextPuzzles = getPuzzlesByDifficulty(nextDifficulty);
+    const nextPuzzleIndex = Math.floor(nextDayIndex / 3) % nextPuzzles.length;
+
+    setCurrentDayIndex(nextDayIndex);
+    setDifficulty(nextDifficulty);
+    setPuzzles(nextPuzzles);
+    setPuzzleIndex(nextPuzzleIndex);
+    setCurrentPuzzleState(nextPuzzles[nextPuzzleIndex]);
     setGameState(createInitialGameState());
+
     toast({
-      title: 'New Puzzle!',
-      description: `Puzzle ${nextIndex + 1} of ${PUZZLES.length}`,
+      title: `${
+        nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1)
+      } Puzzle`,
+      description: 'New puzzle loaded!',
       duration: 2000,
     });
   };
@@ -150,6 +181,14 @@ export default function Numbler() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [gameState.gameWon, gameState.gameLost, handleSubmit]);
 
+  // Get next difficulty for button label
+  const nextDifficulty = getDifficultyForDay(currentDayIndex + 1);
+  const difficultyColors = {
+    easy: 'text-green-600',
+    medium: 'text-yellow-600',
+    hard: 'text-red-600',
+  };
+
   return (
     <div
       className="container mx-auto px-4 py-8 max-w-lg"
@@ -161,6 +200,7 @@ export default function Numbler() {
         data-testid="game-header"
       >
         <h1 className="text-3xl font-bold mb-4">Numbler</h1>
+
         <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
           <p className="text-muted-foreground mb-2">
             Find an equation that equals
@@ -216,13 +256,17 @@ export default function Numbler() {
         </div>
       </div>
 
-      {/* Next Puzzle Button - TEMPORARY */}
-      <div className="flex justify-center mt-4">
+      {/* Current Difficulty Label & Next Puzzle Button */}
+      <div className="flex flex-col items-center mt-4 gap-2">
+        <p className={`text-sm font-semibold ${difficultyColors[difficulty]}`}>
+          Current: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+        </p>
         <button
           onClick={handleNextPuzzle}
-          className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 active:scale-95 transition-all shadow-md"
+          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md"
         >
-          Next Puzzle ({puzzleIndex + 1}/{PUZZLES.length})
+          Next:{' '}
+          {nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1)}
         </button>
       </div>
     </div>
