@@ -14,8 +14,9 @@ interface TileProps {
 
 function Tile({ character, state }: TileProps) {
   const getTileClasses = () => {
-    const baseClasses = "w-12 h-12 border-2 rounded flex items-center justify-center text-xl font-bold";
-    
+    const baseClasses =
+      'w-12 h-12 border-2 rounded flex items-center justify-center text-xl font-bold';
+
     switch (state) {
       case 'correct':
         return `${baseClasses} tile-correct`;
@@ -31,13 +32,21 @@ function Tile({ character, state }: TileProps) {
   };
 
   return (
-    <div className={getTileClasses()} data-testid={`tile-${character || 'empty'}`}>
+    <div
+      className={getTileClasses()}
+      data-testid={`tile-${character || 'empty'}`}
+    >
       {character}
     </div>
   );
 }
 
-export function GameBoard({ guesses, currentGuess, currentRow, tileStates }: GameBoardProps) {
+export function GameBoard({
+  guesses,
+  currentGuess,
+  currentRow,
+  tileStates,
+}: GameBoardProps) {
   const renderRow = (rowIndex: number) => {
     let rowContent = '';
     let rowStates: TileState[] = Array(5).fill('empty');
@@ -49,16 +58,20 @@ export function GameBoard({ guesses, currentGuess, currentRow, tileStates }: Gam
     } else if (rowIndex === currentRow && currentGuess.length > 0) {
       // Current input row
       rowContent = currentGuess;
-      rowStates = Array(5).fill('empty').map((_, i) => 
-        i < currentGuess.length ? 'filled' : 'empty'
-      );
+      rowStates = Array(5)
+        .fill('empty')
+        .map((_, i) => (i < currentGuess.length ? 'filled' : 'empty'));
     }
 
     // Pad content to 5 characters
     const paddedContent = rowContent.padEnd(5, ' ');
 
     return (
-      <div key={rowIndex} className="grid grid-cols-5 gap-2" data-testid={`row-${rowIndex}`}>
+      <div
+        key={rowIndex}
+        className="grid grid-cols-5 gap-2 justify-items-center"
+        data-testid={`row-${rowIndex}`}
+      >
         {Array.from({ length: 5 }).map((_, colIndex) => (
           <Tile
             key={colIndex}
@@ -71,8 +84,11 @@ export function GameBoard({ guesses, currentGuess, currentRow, tileStates }: Gam
   };
 
   return (
-    <div className="mb-8">
-      <div className="grid grid-rows-6 gap-2 mb-6" data-testid="game-board">
+    <div className="mb-8 flex justify-center">
+      <div
+        className="grid grid-rows-6 gap-2 mb-6 w-fit"
+        data-testid="game-board"
+      >
         {Array.from({ length: 6 }).map((_, rowIndex) => renderRow(rowIndex))}
       </div>
     </div>
