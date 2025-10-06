@@ -150,6 +150,22 @@ export default function Mathler() {
             {TARGET_NUMBER}
           </div>
         </div>
+
+        {/* ADD THIS - Color Legend */}
+        <div className="flex justify-center gap-4 mt-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 tile-correct rounded"></div>
+            <span>Correct</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 tile-partial rounded"></div>
+            <span>Wrong spot</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 tile-incorrect rounded"></div>
+            <span>Not in answer</span>
+          </div>
+        </div>
       </header>
 
       {/* Game Board */}
