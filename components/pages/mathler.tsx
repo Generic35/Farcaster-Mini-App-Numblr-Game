@@ -152,12 +152,7 @@ export default function Mathler() {
         data-testid="game-instructions"
       >
         <div className="text-sm text-muted-foreground mb-4">
-          <p>
-            Enter a math equation that equals{' '}
-            <span className="font-semibold text-foreground">
-              {TARGET_NUMBER}
-            </span>
-          </p>
+          <p>Enter a math equation that equals {TARGET_NUMBER}</p>
           <p>Use numbers (0-9) and operators (+, -, ×, ÷)</p>
         </div>
       </div>
