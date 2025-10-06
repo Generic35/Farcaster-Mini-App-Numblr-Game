@@ -73,11 +73,18 @@ export default function Mathler() {
     // Show win/loss messages
     if (isWin) {
       setTimeout(() => {
-        console.log('>>> 🎉 Congratulations! You solved it!');
+        toast({
+          title: '🎉 Congratulations!',
+          description: 'You solved it!',
+        });
       }, 500);
     } else if (isLoss) {
       setTimeout(() => {
-        console.log(`>>> Game Over! The answer was: ${SOLUTION}`);
+        toast({
+          title: 'Game Over!',
+          description: `The answer was: ${SOLUTION}`,
+          variant: 'destructive',
+        });
       }, 500);
     }
   };
