@@ -10,7 +10,7 @@ import {
 } from '@/components/ui/toast';
 
 export function Toaster() {
-  const { toasts } = useToast();
+  const { toasts, dismiss } = useToast();
 
   return (
     <ToastProvider>
@@ -18,6 +18,8 @@ export function Toaster() {
         return (
           <Toast
             key={id}
+            onClick={() => dismiss(id)}
+            className="cursor-pointer"
             {...props}
           >
             <div className="grid gap-1">
