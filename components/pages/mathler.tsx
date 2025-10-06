@@ -15,6 +15,7 @@ import {
   checkWin,
   isValidCharacter,
 } from '@/lib/game-logic';
+import confetti from 'canvas-confetti';
 
 export default function Mathler() {
   const [gameState, setGameState] = useState<GameState>(
@@ -73,6 +74,14 @@ export default function Mathler() {
     // Show win/loss messages
     if (isWin) {
       setTimeout(() => {
+        // Trigger confetti
+        confetti({
+          particleCount: 100,
+          spread: 70,
+          origin: { y: 0.6 },
+        });
+
+        // Show toast
         toast({
           title: '🎉 Congratulations!',
           description: 'You solved it!',
