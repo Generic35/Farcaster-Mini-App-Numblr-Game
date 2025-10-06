@@ -7,7 +7,8 @@ import { useToast } from '@/hooks/use-toast';
 import {
   GameState,
   Difficulty,
-  getPuzzlesByDifficulty,
+  getDailyPuzzle,
+  getPuzzleForDay,
   createInitialGameState,
   addCharacterToGuess,
   removeCharacterFromGuess,
@@ -17,30 +18,19 @@ import {
   isValidCharacter,
 } from '@/lib/game-logic';
 
-// Get daily puzzle index based on day of month
-function getDailyPuzzleIndex() {
-  const today = new Date();
-  const dayOfMonth = today.getDate(); // 1-31
-  return dayOfMonth - 1; // 0-30 for array index
-}
-
 // Rotate difficulty: Easy → Medium → Hard → Easy...
-function getDifficultyForDay(dayIndex: number): Difficulty {
+function getDifficultyForDay(dayOffset: number): Difficulty {
   const difficulties: Difficulty[] = ['easy', 'medium', 'hard'];
-  return difficulties[dayIndex % 3];
+  return difficulties[dayOffset % 3];
 }
 
 export default function Numbler() {
-  const [currentDayIndex, setCurrentDayIndex] = useState(getDailyPuzzleIndex());
+  const [currentDayOffset, setCurrentDayOffset] = useState(0);
   const [difficulty, setDifficulty] = useState<Difficulty>(
-    getDifficultyForDay(currentDayIndex)
+    getDifficultyForDay(0)
   );
-  const [puzzles, setPuzzles] = useState(getPuzzlesByDifficulty(difficulty));
-  const [puzzleIndex, setPuzzleIndex] = useState(
-    Math.floor(currentDayIndex / 3) % puzzles.length
-  );
-  const [currentPuzzle, setCurrentPuzzleState] = useState(
-    puzzles[Math.floor(currentDayIndex / 3) % puzzles.length]
+  const [currentPuzzle, setCurrentPuzzle] = useState(
+    getPuzzleForDay(difficulty, 0)
   );
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
@@ -48,16 +38,13 @@ export default function Numbler() {
   const { toast } = useToast();
 
   const handleNextPuzzle = () => {
-    const nextDayIndex = currentDayIndex + 1;
-    const nextDifficulty = getDifficultyForDay(nextDayIndex);
-    const nextPuzzles = getPuzzlesByDifficulty(nextDifficulty);
-    const nextPuzzleIndex = Math.floor(nextDayIndex / 3) % nextPuzzles.length;
+    const nextDayOffset = currentDayOffset + 1;
+    const nextDifficulty = getDifficultyForDay(nextDayOffset);
+    const nextPuzzle = getPuzzleForDay(nextDifficulty, nextDayOffset);
 
-    setCurrentDayIndex(nextDayIndex);
+    setCurrentDayOffset(nextDayOffset);
     setDifficulty(nextDifficulty);
-    setPuzzles(nextPuzzles);
-    setPuzzleIndex(nextPuzzleIndex);
-    setCurrentPuzzleState(nextPuzzles[nextPuzzleIndex]);
+    setCurrentPuzzle(nextPuzzle);
     setGameState(createInitialGameState());
 
     toast({
@@ -182,7 +169,7 @@ export default function Numbler() {
   }, [gameState.gameWon, gameState.gameLost, handleSubmit]);
 
   // Get next difficulty for button label
-  const nextDifficulty = getDifficultyForDay(currentDayIndex + 1);
+  const nextDifficulty = getDifficultyForDay(currentDayOffset + 1);
   const difficultyColors = {
     easy: 'text-green-600',
     medium: 'text-yellow-600',

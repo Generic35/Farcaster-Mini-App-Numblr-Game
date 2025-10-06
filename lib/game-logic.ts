@@ -11,59 +11,118 @@ export interface GameState {
   tileStates: TileState[][];
 }
 
-export const PUZZLES_BY_DIFFICULTY = {
-  easy: [
-    { target: 6, solution: "1+2+3" },
-    { target: 10, solution: "2*3+4" },
-    { target: 8, solution: "4+4+0" },
-    { target: 7, solution: "9-4+2" },
-    { target: 11, solution: "5+3+3" },
-    { target: 14, solution: "7*2+0" },
-    { target: 9, solution: "3*3+0" },
-    { target: 12, solution: "6+6+0" },
-    { target: 5, solution: "2+2+1" },
-    { target: 13, solution: "8+3+2" },
-  ],
-  medium: [
-    { target: 15, solution: "5*4-5" },
-    { target: 18, solution: "6*4-6" },
-    { target: 12, solution: "3*5-3" },
-    { target: 20, solution: "5*5-5" },
-    { target: 16, solution: "8*3-8" },
-    { target: 24, solution: "6*5-6" },
-    { target: 21, solution: "7*4-7" },
-    { target: 10, solution: "5*3-5" },
-    { target: 22, solution: "6*4-2" },
-    { target: 14, solution: "9+8-3" },
-  ],
-  hard: [
-    { target: 3, solution: "9/3+0" },
-    { target: 5, solution: "8/2+1" },
-    { target: 6, solution: "8/2+2" },
-    { target: 7, solution: "9/3+4" },
-    { target: 4, solution: "6/3+2" },
-    { target: 2, solution: "8/4+0" },
-    { target: 8, solution: "6/3+6" },
-    { target: 1, solution: "9-4-4" },
-    { target: 9, solution: "6/2+6" },
-    { target: 10, solution: "8/2+6" },
-  ],
-};
-
+// Add these after the imports
 export type Difficulty = 'easy' | 'medium' | 'hard';
 
-export function getPuzzlesByDifficulty(difficulty: Difficulty) {
-  return PUZZLES_BY_DIFFICULTY[difficulty];
+// Seeded random number generator (same seed = same random numbers)
+function seededRandom(seed: number) {
+  let value = seed;
+  return function () {
+    value = (value * 9301 + 49297) % 233280;
+    return value / 233280;
+  };
 }
 
-export let CURRENT_PUZZLE_INDEX = 0;
-export let TARGET_NUMBER = PUZZLES_BY_DIFFICULTY.easy[0].target;
-export let SOLUTION = PUZZLES_BY_DIFFICULTY.easy[0].solution;
+// Get a random integer between min and max
+function getRandomInt(random: () => number, min: number, max: number): number {
+  return Math.floor(random() * (max - min + 1)) + min;
+}
 
-export function setCurrentPuzzle(index: number) {
-  CURRENT_PUZZLE_INDEX = index % PUZZLES_BY_DIFFICULTY.easy.length;
-  TARGET_NUMBER = PUZZLES_BY_DIFFICULTY.easy[CURRENT_PUZZLE_INDEX].target;
-  SOLUTION = PUZZLES_BY_DIFFICULTY.easy[CURRENT_PUZZLE_INDEX].solution;
+// Generate a puzzle based on difficulty and seed (date)
+export function generatePuzzle(difficulty: Difficulty, seed: number): { target: number; solution: string } {
+  const random = seededRandom(seed);
+
+  if (difficulty === 'easy') {
+    // Easy: Simple addition a+b+c (all single digits)
+    const a = getRandomInt(random, 1, 5);
+    const b = getRandomInt(random, 1, 5);
+    const c = getRandomInt(random, 0, 5);
+    const target = a + b + c;
+    const solution = `${a}+${b}+${c}`;
+    return { target, solution };
+  }
+
+  if (difficulty === 'medium') {
+    // Medium: Multiplication with subtraction a*b-c (all single digits)
+    const a = getRandomInt(random, 2, 7);
+    const b = getRandomInt(random, 2, 5);
+    const product = a * b;
+    // c must be single digit (0-9) AND less than product
+    const maxC = Math.min(9, product - 1);
+    const c = maxC > 0 ? getRandomInt(random, 1, maxC) : 0;
+    const target = product - c;
+    const solution = `${a}*${b}-${c}`;
+    return { target, solution };
+  }
+
+  // Hard: Division or complex subtraction (all single digits)
+  const useDiv = random() > 0.5;
+
+  if (useDiv) {
+    // Division: a/b+c or a/b-c (all must be single digits)
+    const b = getRandomInt(random, 2, 4); // divisor
+    const quotient = getRandomInt(random, 2, Math.min(9, Math.floor(9 / b))); // ensure a = b*quotient <= 9
+    const a = b * quotient; // ensure clean division AND single digit
+    const c = getRandomInt(random, 0, 9);
+    const useAdd = random() > 0.5;
+
+    const target = useAdd ? quotient + c : quotient - c;
+    const solution = useAdd ? `${a}/${b}+${c}` : `${a}/${b}-${c}`;
+
+    // Make sure target is positive and a is single digit
+    if (target > 0 && a <= 9) {
+      return { target, solution };
+    }
+  }
+
+  // Fallback: Chain subtraction a-b-c (all single digits)
+  const a = getRandomInt(random, 7, 9);
+  const b = getRandomInt(random, 2, Math.min(5, a - 1));
+  const c = getRandomInt(random, 1, Math.min(9, a - b));
+  const target = a - b - c;
+  const solution = `${a}-${b}-${c}`;
+
+  return { target, solution };
+}
+
+// Get seed from date (day of year)
+export function getDayOfYear(date: Date): number {
+  const start = new Date(date.getFullYear(), 0, 0);
+  const diff = date.getTime() - start.getTime();
+  const oneDay = 1000 * 60 * 60 * 24;
+  return Math.floor(diff / oneDay);
+}
+
+// Get today's puzzle
+export function getDailyPuzzle(difficulty: Difficulty): { target: number; solution: string } {
+  const today = new Date();
+  const dayOfYear = getDayOfYear(today);
+
+  // Different seed per difficulty to get different puzzles
+  const difficultyOffset = { easy: 0, medium: 1000, hard: 2000 };
+  const seed = dayOfYear + difficultyOffset[difficulty];
+
+  return generatePuzzle(difficulty, seed);
+}
+
+// For testing/cycling through puzzles
+export function getPuzzleForDay(difficulty: Difficulty, dayOffset: number = 0): { target: number; solution: string } {
+  const today = new Date();
+  today.setDate(today.getDate() + dayOffset);
+  const dayOfYear = getDayOfYear(today);
+
+  const difficultyOffset = { easy: 0, medium: 1000, hard: 2000 };
+  const seed = dayOfYear + difficultyOffset[difficulty];
+
+  return generatePuzzle(difficulty, seed);
+}
+
+// Keep the old function for backwards compatibility but make it use generated puzzles
+export function getPuzzlesByDifficulty(difficulty: Difficulty) {
+  // Generate 10 puzzles for this difficulty
+  return Array.from({ length: 10 }, (_, i) =>
+    generatePuzzle(difficulty, i * 100 + (difficulty === 'easy' ? 0 : difficulty === 'medium' ? 1000 : 2000))
+  );
 }
 
 export const MAX_GUESSES = 6;
