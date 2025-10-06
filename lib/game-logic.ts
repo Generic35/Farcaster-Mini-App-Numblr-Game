@@ -46,11 +46,11 @@ export function getTileStates(guess: string, solution: string): TileState[] {
   const states: TileState[] = Array(EQUATION_LENGTH).fill('incorrect');
   const solutionChars = solution.split('');
   const guessChars = guess.split('');
-  
+
   // First pass: mark correct positions (green)
   const remainingSolutionChars: string[] = [];
   const remainingGuessIndices: number[] = [];
-  
+
   for (let i = 0; i < EQUATION_LENGTH; i++) {
     if (guessChars[i] === solutionChars[i]) {
       states[i] = 'correct';
@@ -59,33 +59,31 @@ export function getTileStates(guess: string, solution: string): TileState[] {
       remainingGuessIndices.push(i);
     }
   }
-  
+
   // Second pass: mark partial matches (yellow)
   for (const guessIndex of remainingGuessIndices) {
     const guessChar = guessChars[guessIndex];
     const solutionIndex = remainingSolutionChars.indexOf(guessChar);
-    
+
     if (solutionIndex !== -1) {
       states[guessIndex] = 'partial';
       remainingSolutionChars.splice(solutionIndex, 1);
     }
   }
-  
+
   return states;
 }
 
 export function checkWin(guess: string, target: number, solution: string): boolean {
-  // Check if equation evaluates to target
+  // Must evaluate to the target number
   const result = safeEvaluateEquation(guess);
   if (result !== target) return false;
-  
-  // Check if it's the exact solution or commutative equivalent
+
+  // Must be the exact solution (not just any equation that equals target)
   const normalizedGuess = guess.replace(/×/g, '*').replace(/÷/g, '/');
   const normalizedSolution = solution.replace(/×/g, '*').replace(/÷/g, '/');
-  
-  // For this simple case, we'll consider it a win if it equals the target
-  // In a more complex implementation, we might check for structural similarity
-  return result === target;
+
+  return normalizedGuess === normalizedSolution;
 }
 
 export function isCommutativeEquivalent(guess: string, solution: string): boolean {
