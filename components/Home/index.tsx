@@ -4,11 +4,20 @@ import { useUser } from '@/contexts/user-context';
 import Image from 'next/image';
 import { useAccount } from 'wagmi';
 import Link from 'next/link';
+import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const { user, isLoading, error, signIn } = useUser();
 
   const { address } = useAccount();
+  const router = useRouter();
+  const [isNavigating, setIsNavigating] = useState(false);
+
+  const handlePlayClick = () => {
+    setIsNavigating(true);
+    router.push('/game');
+  };
 
   return (
     <div className="bg-white text-black flex min-h-screen flex-col items-center justify-center p-4">
@@ -43,7 +52,7 @@ export default function Home() {
         ) : (
           <div className="space-y-4">
             {user && (
-              <div className="flex flex-col items-center space-y-2 min-h-[160px] justify-center">
+              <div className="flex flex-col items-center min-h-[160px] justify-center">
                 {user.isLoading ? (
                   <div className="flex items-center justify-center">
                     <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
@@ -57,13 +66,30 @@ export default function Home() {
                       width={80}
                       height={80}
                     />
-                    <div className="text-center">
+                    <div className="text-center mt-4">
                       <p className="font-semibold">{user.data.display_name}</p>
                       <p className="text-sm text-muted-foreground">
                         @{user.data.username}
                       </p>
                     </div>
-                    <Link href="/game">Play Mathler</Link>
+                    <button
+                      onClick={handlePlayClick}
+                      disabled={isNavigating}
+                      className={`mt-12 inline-flex items-center justify-center px-8 py-4 font-bold text-lg rounded-xl transition-all shadow-lg hover:shadow-xl ${
+                        isNavigating
+                          ? 'bg-gray-400 cursor-not-allowed'
+                          : 'bg-blue-600 hover:bg-blue-700 active:scale-[0.98]'
+                      } text-white`}
+                    >
+                      {isNavigating ? (
+                        <>
+                          <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white mr-2" />
+                          Loading...
+                        </>
+                      ) : (
+                        'Play Mathler'
+                      )}
+                    </button>
                   </>
                 )}
               </div>
