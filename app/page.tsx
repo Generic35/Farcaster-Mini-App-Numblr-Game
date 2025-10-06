@@ -21,9 +21,9 @@ const frame = {
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
-    title: "Mini-app Starter",
+    title: "Numbler",
     openGraph: {
-      title: "Mini-app Starter",
+      title: "Numbler",
       description: "A starter for Farcastermini-apps",
     },
     other: {

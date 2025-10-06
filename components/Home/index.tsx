@@ -87,7 +87,7 @@ export default function Home() {
                           Loading...
                         </>
                       ) : (
-                        'Play Mathler'
+                        'Play Numbler'
                       )}
                     </button>
                   </>

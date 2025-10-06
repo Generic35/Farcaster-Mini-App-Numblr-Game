@@ -6,7 +6,7 @@ import "./globals.css";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "Farcaster Mini-app Starter",
+  title: "Numbler",
   description: "A starter for Farcaster mini-apps",
 };
 

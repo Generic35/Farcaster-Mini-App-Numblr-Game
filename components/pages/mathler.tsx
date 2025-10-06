@@ -138,7 +138,7 @@ export default function Mathler() {
         className="text-center mb-6"
         data-testid="game-header"
       >
-        <h1 className="text-3xl font-bold mb-4">Mathler</h1>
+        <h1 className="text-3xl font-bold mb-4">Numbler</h1>
         <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
           <p className="text-muted-foreground mb-2">
             Find an equation that equals
