@@ -50,6 +50,7 @@ export default function Mathler() {
         description:
           'Please enter a valid 5-character equation that can be calculated.',
         variant: 'destructive',
+        duration: 2000,
       });
       return;
     }
@@ -71,20 +72,19 @@ export default function Mathler() {
       ),
     }));
 
-    // Show win/loss messages
+    // Show win/loss/try-again messages
     if (isWin) {
       setTimeout(() => {
-        // Trigger confetti
         confetti({
           particleCount: 100,
           spread: 70,
           origin: { y: 0.6 },
         });
 
-        // Show toast
         toast({
           title: '🎉 Congratulations!',
           description: 'You solved it!',
+          duration: 5000, // 5 seconds - celebrate!
         });
       }, 500);
     } else if (isLoss) {
@@ -93,6 +93,18 @@ export default function Mathler() {
           title: 'Game Over!',
           description: `The answer was: ${SOLUTION}`,
           variant: 'destructive',
+          duration: Infinity, // Don't auto-dismiss - important info
+        });
+      }, 500);
+    } else {
+      // Wrong guess, still has tries
+      setTimeout(() => {
+        toast({
+          title: 'Not quite!',
+          description: `${6 - newRow} ${
+            6 - newRow === 1 ? 'try' : 'tries'
+          } remaining`,
+          duration: 2000, // 2 seconds - quick feedback, don't block gameplay
         });
       }, 500);
     }
