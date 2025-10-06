@@ -11,8 +11,30 @@ export interface GameState {
   tileStates: TileState[][];
 }
 
-export const TARGET_NUMBER = 6;
-export const SOLUTION = "1+2+3";
+export const PUZZLES = [
+  // Easy puzzles
+  { target: 6, solution: "1+2+3" },
+  { target: 10, solution: "2*3+4" },
+  { target: 8, solution: "4+4+0" },
+  { target: 12, solution: "3*5-3" },
+  { target: 15, solution: "5*4-5" },
+  { target: 9, solution: "3*3*1" },
+  { target: 7, solution: "9-4+2" },
+  { target: 11, solution: "5+3+3" },
+  { target: 14, solution: "7*2+0" },
+  { target: 16, solution: "4*4*1" },
+];
+
+export let CURRENT_PUZZLE_INDEX = 0;
+export let TARGET_NUMBER = PUZZLES[0].target;
+export let SOLUTION = PUZZLES[0].solution;
+
+export function setCurrentPuzzle(index: number) {
+  CURRENT_PUZZLE_INDEX = index % PUZZLES.length;
+  TARGET_NUMBER = PUZZLES[CURRENT_PUZZLE_INDEX].target;
+  SOLUTION = PUZZLES[CURRENT_PUZZLE_INDEX].solution;
+}
+
 export const MAX_GUESSES = 6;
 export const EQUATION_LENGTH = 5;
 

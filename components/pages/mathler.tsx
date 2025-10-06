@@ -1,12 +1,12 @@
 'use client';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
+import confetti from 'canvas-confetti';
 import { GameBoard } from '@/components/game-board';
 import { Keypad } from '@/components/keypad';
 import { useToast } from '@/hooks/use-toast';
 import {
   GameState,
-  TARGET_NUMBER,
-  SOLUTION,
+  PUZZLES,
   createInitialGameState,
   addCharacterToGuess,
   removeCharacterFromGuess,
@@ -14,14 +14,29 @@ import {
   getTileStates,
   checkWin,
   isValidCharacter,
+  setCurrentPuzzle,
 } from '@/lib/game-logic';
-import confetti from 'canvas-confetti';
 
-export default function Mathler() {
+export default function Numbler() {
+  const [puzzleIndex, setPuzzleIndex] = useState(0);
+  const [currentPuzzle, setCurrentPuzzleState] = useState(PUZZLES[0]);
   const [gameState, setGameState] = useState<GameState>(
     createInitialGameState()
   );
   const { toast } = useToast();
+
+  const handleNextPuzzle = () => {
+    const nextIndex = (puzzleIndex + 1) % PUZZLES.length;
+    setPuzzleIndex(nextIndex);
+    setCurrentPuzzle(nextIndex);
+    setCurrentPuzzleState(PUZZLES[nextIndex]);
+    setGameState(createInitialGameState());
+    toast({
+      title: 'New Puzzle!',
+      description: `Puzzle ${nextIndex + 1} of ${PUZZLES.length}`,
+      duration: 2000,
+    });
+  };
 
   const handleKeyPress = (key: string) => {
     if (gameState.gameWon || gameState.gameLost) return;
@@ -41,74 +56,81 @@ export default function Mathler() {
     }));
   };
 
-  const handleSubmit = () => {
-    console.log('>>> handleSubmit tapped');
-    if (gameState.gameWon || gameState.gameLost) return;
-    if (!canSubmitGuess(gameState.currentGuess)) {
-      toast({
-        title: 'Invalid equation',
-        description:
-          'Please enter a valid 5-character equation that can be calculated.',
-        variant: 'destructive',
-        duration: 2000,
-      });
-      return;
-    }
+  const handleSubmit = useCallback(() => {
+    setGameState((prev) => {
+      if (prev.gameWon || prev.gameLost) return prev;
 
-    const newTileStates = getTileStates(gameState.currentGuess, SOLUTION);
-    const isWin = checkWin(gameState.currentGuess, TARGET_NUMBER, SOLUTION);
-    const newRow = gameState.currentRow + 1;
-    const isLoss = !isWin && newRow >= 6;
-
-    setGameState((prev) => ({
-      ...prev,
-      guesses: [...prev.guesses, prev.currentGuess],
-      currentGuess: '',
-      currentRow: newRow,
-      gameWon: isWin,
-      gameLost: isLoss,
-      tileStates: prev.tileStates.map((row, index) =>
-        index === prev.currentRow ? newTileStates : row
-      ),
-    }));
-
-    // Show win/loss/try-again messages
-    if (isWin) {
-      setTimeout(() => {
-        confetti({
-          particleCount: 100,
-          spread: 70,
-          origin: { y: 0.6 },
-        });
-
+      if (!canSubmitGuess(prev.currentGuess)) {
         toast({
-          title: '🎉 Congratulations!',
-          description: 'You solved it!',
-          duration: 5000, // 5 seconds - celebrate!
-        });
-      }, 500);
-    } else if (isLoss) {
-      setTimeout(() => {
-        toast({
-          title: 'Game Over!',
-          description: `The answer was: ${SOLUTION}`,
+          title: 'Invalid equation',
+          description:
+            'Please enter a valid 5-character equation that can be calculated.',
           variant: 'destructive',
-          duration: Infinity, // Don't auto-dismiss - important info
         });
-      }, 500);
-    } else {
-      // Wrong guess, still has tries
-      setTimeout(() => {
-        toast({
-          title: 'Not quite!',
-          description: `${6 - newRow} ${
-            6 - newRow === 1 ? 'try' : 'tries'
-          } remaining`,
-          duration: 2000, // 2 seconds - quick feedback, don't block gameplay
-        });
-      }, 500);
-    }
-  };
+        return prev;
+      }
+
+      const newTileStates = getTileStates(
+        prev.currentGuess,
+        currentPuzzle.solution
+      );
+      const isWin = checkWin(
+        prev.currentGuess,
+        currentPuzzle.target,
+        currentPuzzle.solution
+      );
+      const newRow = prev.currentRow + 1;
+      const isLoss = !isWin && newRow >= 6;
+
+      // Show win/loss/try-again messages
+      if (isWin) {
+        setTimeout(() => {
+          confetti({
+            particleCount: 100,
+            spread: 70,
+            origin: { y: 0.6 },
+          });
+
+          toast({
+            title: '🎉 Congratulations!',
+            description: 'You solved it!',
+            duration: 5000,
+          });
+        }, 500);
+      } else if (isLoss) {
+        setTimeout(() => {
+          toast({
+            title: 'Game Over!',
+            description: `The answer was: ${currentPuzzle.solution}`,
+            variant: 'destructive',
+            duration: Infinity,
+          });
+        }, 500);
+      } else {
+        setTimeout(() => {
+          toast({
+            title: 'Not quite!',
+            description: `${6 - newRow} ${
+              6 - newRow === 1 ? 'try' : 'tries'
+            } remaining`,
+            duration: 2000,
+          });
+        }, 500);
+      }
+
+      return {
+        ...prev,
+        guesses: [...prev.guesses, prev.currentGuess],
+        currentGuess: '',
+        currentRow: newRow,
+        gameWon: isWin,
+        gameLost: isLoss,
+        tileStates: prev.tileStates.map((row, index) =>
+          index === prev.currentRow ? newTileStates : row
+        ),
+      };
+    });
+  }, [toast, currentPuzzle]);
 
   // Keyboard event handling
   useEffect(() => {
@@ -126,12 +148,12 @@ export default function Mathler() {
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [gameState.gameWon, gameState.gameLost]);
+  }, [gameState.gameWon, gameState.gameLost, handleSubmit]);
 
   return (
     <div
       className="container mx-auto px-4 py-8 max-w-lg"
-      data-testid="mathler-game"
+      data-testid="numbler-game"
     >
       {/* Game Header */}
       <header
@@ -147,7 +169,7 @@ export default function Mathler() {
             className="text-4xl font-bold text-primary"
             data-testid="target-number"
           >
-            {TARGET_NUMBER}
+            {currentPuzzle.target}
           </div>
         </div>
       </header>
@@ -173,7 +195,7 @@ export default function Mathler() {
         data-testid="game-instructions"
       >
         <div className="text-sm text-muted-foreground mb-3">
-          <p>Enter a math equation that equals {TARGET_NUMBER}</p>
+          <p>Enter a math equation that equals {currentPuzzle.target}</p>
           <p>Use numbers (0-9) and operators (+, -, ×, ÷)</p>
         </div>
 
@@ -192,6 +214,16 @@ export default function Mathler() {
             <span>Not in answer</span>
           </div>
         </div>
+      </div>
+
+      {/* Next Puzzle Button - TEMPORARY */}
+      <div className="flex justify-center mt-4">
+        <button
+          onClick={handleNextPuzzle}
+          className="px-6 py-3 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 active:scale-95 transition-all shadow-md"
+        >
+          Next Puzzle ({puzzleIndex + 1}/{PUZZLES.length})
+        </button>
       </div>
     </div>
   );
