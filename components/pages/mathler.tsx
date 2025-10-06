@@ -129,13 +129,10 @@ export default function Mathler() {
   }, [gameState.gameWon, gameState.gameLost]);
 
   return (
-    <div
-      className="container mx-auto px-4 py-8 max-w-lg"
-      data-testid="mathler-game"
-    >
+    <div className="container mx-auto px-4 py-8 max-w-lg" data-testid="mathler-game">
       {/* Game Header */}
       <header
-        className="text-center mb-8"
+        className="text-center mb-6"
         data-testid="game-header"
       >
         <h1 className="text-3xl font-bold mb-4">Mathler</h1>
@@ -148,22 +145,6 @@ export default function Mathler() {
             data-testid="target-number"
           >
             {TARGET_NUMBER}
-          </div>
-        </div>
-
-        {/* ADD THIS - Color Legend */}
-        <div className="flex justify-center gap-4 mt-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 tile-correct rounded"></div>
-            <span>Correct</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 tile-partial rounded"></div>
-            <span>Wrong spot</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 tile-incorrect rounded"></div>
-            <span>Not in answer</span>
           </div>
         </div>
       </header>
@@ -188,9 +169,25 @@ export default function Mathler() {
         className="text-center"
         data-testid="game-instructions"
       >
-        <div className="text-sm text-muted-foreground mb-4">
+        <div className="text-sm text-muted-foreground mb-3">
           <p>Enter a math equation that equals {TARGET_NUMBER}</p>
           <p>Use numbers (0-9) and operators (+, -, ×, ÷)</p>
+        </div>
+
+        {/* Color Legend */}
+        <div className="flex justify-center gap-4 text-xs text-muted-foreground">
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 tile-correct rounded"></div>
+            <span>Correct</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 tile-partial rounded"></div>
+            <span>Wrong spot</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <div className="w-4 h-4 tile-incorrect rounded"></div>
+            <span>Not in answer</span>
+          </div>
         </div>
       </div>
     </div>
