@@ -16,6 +16,8 @@ import {
   getTileStates,
   checkWin,
   isValidCharacter,
+  generateShareResultData,
+  getCurrentPuzzleNumber,
 } from '@/lib/game-logic';
 
 // Rotate difficulty: Easy → Medium → Hard → Easy...
@@ -168,6 +170,16 @@ export default function Numbler() {
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [gameState.gameWon, gameState.gameLost, handleSubmit]);
+
+  // Add this test function after your existing useEffect hooks
+  useEffect(() => {
+    // ✅ Validation: Test result generation when game ends
+    if (gameState.gameWon || gameState.gameLost) {
+      const resultData = generateShareResultData(gameState, getCurrentPuzzleNumber());
+      console.log('🎲 Generated Result Data:', resultData);
+      console.log('📱 Shareable Text:\n', resultData.text);
+    }
+  }, [gameState.gameWon, gameState.gameLost, gameState]);
 
   // Get next difficulty for button label
   const nextDifficulty = getDifficultyForDay(currentDayOffset + 1);

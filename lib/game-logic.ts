@@ -218,3 +218,55 @@ export function removeCharacterFromGuess(currentGuess: string): string {
 export function canSubmitGuess(guess: string): boolean {
   return guess.length === EQUATION_LENGTH && safeEvaluateEquation(guess) !== null;
 }
+
+// Share result generation functions
+export interface ShareResultData {
+  text: string;
+  grid: string;
+  attempts: number;
+  won: boolean;
+  puzzleNumber: number;
+}
+
+function tileStateToEmoji(state: TileState): string {
+  switch (state) {
+    case 'correct':
+      return '🟩';
+    case 'partial':
+      return '🟨';
+    case 'incorrect':
+      return '⬜';
+    default:
+      return '⬜'; // fallback for empty/filled states
+  }
+}
+
+export function generateShareResultData(
+  gameState: GameState,
+  puzzleNumber: number
+): ShareResultData {
+  // Only include completed rows (up to currentRow)
+  const completedRows = gameState.tileStates.slice(0, gameState.currentRow);
+  
+  // Convert tile states to emoji grid
+  const grid = completedRows
+    .map(row => row.map(tileStateToEmoji).join(''))
+    .join('\n');
+
+  // Generate the shareable text
+  const status = gameState.gameWon ? gameState.currentRow : 'X';
+  const text = `🎲 Numbler #${puzzleNumber} ${status}/6\n\n${grid}`;
+
+  return {
+    text,
+    grid,
+    attempts: gameState.currentRow,
+    won: gameState.gameWon,
+    puzzleNumber
+  };
+}
+
+// Helper to get current puzzle number (day of year)
+export function getCurrentPuzzleNumber(): number {
+  return getDayOfYear(new Date());
+}
