@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from 'react';
 import confetti from 'canvas-confetti';
 import { GameBoard } from '@/components/game-board';
 import { Keypad } from '@/components/keypad';
+import { ResultScreen } from '@/components/result-screen';
 import { useToast } from '@/hooks/use-toast';
 import {
   GameState,
@@ -40,6 +41,11 @@ export default function Numbler() {
   );
   const { toast } = useToast();
 
+  // 🧪 DEV TESTING: Force win/loss states for validation
+  // Uncomment one of these lines to test the ResultScreen:
+  // const [gameState, setGameState] = useState<GameState>({...createInitialGameState(), gameWon: true, currentRow: 3});
+  // const [gameState, setGameState] = useState<GameState>({...createInitialGameState(), gameLost: true, currentRow: 6});
+
   const handleNextPuzzle = () => {
     const nextDayOffset = currentDayOffset + 1;
     const nextDifficulty = getDifficultyForDay(nextDayOffset);
@@ -57,6 +63,30 @@ export default function Numbler() {
       description: 'New puzzle loaded!',
       duration: 2000,
     });
+  };
+
+  const handleShare = () => {
+    const resultData = generateShareResultData(
+      gameState,
+      getCurrentPuzzleNumber()
+    );
+    const shareUrl = generateShareUrl(resultData);
+
+    // For now, copy to clipboard and show toast
+    // TODO: Integrate with Farcaster miniapp SDK for native sharing
+    navigator.clipboard
+      .writeText(`${resultData.text}\n\n${shareUrl}`)
+      .then(() => {
+        toast({
+          title: '📱 Copied to clipboard!',
+          description: 'Share your result on Farcaster',
+          duration: 3000,
+        });
+      })
+      .catch(() => {
+        // Fallback: open share URL directly
+        window.open(shareUrl, '_blank');
+      });
   };
 
   const handleKeyPress = (key: string) => {
@@ -230,12 +260,25 @@ export default function Numbler() {
         tileStates={gameState.tileStates}
       />
 
-      {/* On-Screen Keypad */}
-      <Keypad
-        onKeyPress={handleKeyPress}
-        onBackspace={handleBackspace}
-        onSubmit={handleSubmit}
-      />
+      {/* Conditional: Show Result Screen or Keypad */}
+      {gameState.gameWon || gameState.gameLost ? (
+        <ResultScreen
+          gameState={gameState}
+          puzzleNumber={getCurrentPuzzleNumber()}
+          targetNumber={currentPuzzle.target}
+          solution={currentPuzzle.solution}
+          difficulty={difficulty}
+          nextDifficulty={nextDifficulty}
+          onShare={handleShare}
+          onNextPuzzle={handleNextPuzzle}
+        />
+      ) : (
+        <Keypad
+          onKeyPress={handleKeyPress}
+          onBackspace={handleBackspace}
+          onSubmit={handleSubmit}
+        />
+      )}
 
       {/* Game Instructions */}
       <div
@@ -264,19 +307,23 @@ export default function Numbler() {
         </div>
       </div>
 
-      {/* Current Difficulty Label & Next Puzzle Button */}
-      <div className="flex flex-col items-center mt-4 gap-2">
-        <p className={`text-sm font-semibold ${difficultyColors[difficulty]}`}>
-          Current: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-        </p>
-        <button
-          onClick={handleNextPuzzle}
-          className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md"
-        >
-          Next:{' '}
-          {nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1)}
-        </button>
-      </div>
+      {/* Current Difficulty Label - Only show when game is active */}
+      {!gameState.gameWon && !gameState.gameLost && (
+        <div className="flex flex-col items-center mt-4 gap-2">
+          <p
+            className={`text-sm font-semibold ${difficultyColors[difficulty]}`}
+          >
+            Current: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
+          </p>
+          <button
+            onClick={handleNextPuzzle}
+            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md"
+          >
+            Next:{' '}
+            {nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1)}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
