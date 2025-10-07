@@ -247,7 +247,7 @@ export function generateShareResultData(
 ): ShareResultData {
   // Only include completed rows (up to currentRow)
   const completedRows = gameState.tileStates.slice(0, gameState.currentRow);
-  
+
   // Convert tile states to emoji grid
   const grid = completedRows
     .map(row => row.map(tileStateToEmoji).join(''))
@@ -269,4 +269,19 @@ export function generateShareResultData(
 // Helper to get current puzzle number (day of year)
 export function getCurrentPuzzleNumber(): number {
   return getDayOfYear(new Date());
+}
+
+// Generate shareable Frame URL
+export function generateShareUrl(resultData: ShareResultData): string {
+  const appUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+
+  // Encode result data as base64 to include in URL
+  const encodedData = Buffer.from(JSON.stringify({
+    attempts: resultData.attempts,
+    grid: resultData.grid,
+    puzzleNumber: resultData.puzzleNumber,
+    won: resultData.won
+  })).toString('base64');
+
+  return `${appUrl}/share/${encodedData}`;
 }

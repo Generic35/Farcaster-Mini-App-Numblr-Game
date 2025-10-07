@@ -18,6 +18,7 @@ import {
   isValidCharacter,
   generateShareResultData,
   getCurrentPuzzleNumber,
+  generateShareUrl,
 } from '@/lib/game-logic';
 
 // Rotate difficulty: Easy → Medium → Hard → Easy...
@@ -171,13 +172,20 @@ export default function Numbler() {
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [gameState.gameWon, gameState.gameLost, handleSubmit]);
 
-  // Add this test function after your existing useEffect hooks
+  // Update the existing useEffect to also generate share URL
   useEffect(() => {
     // ✅ Validation: Test result generation when game ends
     if (gameState.gameWon || gameState.gameLost) {
-      const resultData = generateShareResultData(gameState, getCurrentPuzzleNumber());
+      const resultData = generateShareResultData(
+        gameState,
+        getCurrentPuzzleNumber()
+      );
+      const shareUrl = generateShareUrl(resultData);
+
       console.log('🎲 Generated Result Data:', resultData);
       console.log('📱 Shareable Text:\n', resultData.text);
+      console.log('🔗 Share URL:', shareUrl);
+      console.log('🖼️ Test Frame in browser:', shareUrl);
     }
   }, [gameState.gameWon, gameState.gameLost, gameState]);
 
