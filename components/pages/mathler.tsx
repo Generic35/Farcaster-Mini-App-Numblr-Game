@@ -5,6 +5,8 @@ import { GameBoard } from '@/components/game-board';
 import { Keypad } from '@/components/keypad';
 import { ResultScreen } from '@/components/result-screen';
 import { useToast } from '@/hooks/use-toast';
+import { useMiniApp } from '@/contexts/miniapp-context';
+import { sdk } from '@farcaster/miniapp-sdk';
 import {
   GameState,
   Difficulty,
@@ -40,6 +42,7 @@ export default function Numbler() {
     createInitialGameState()
   );
   const { toast } = useToast();
+  const { isMiniAppReady, context } = useMiniApp();
 
   // 🧪 DEV TESTING: Force win/loss states for validation
   // Uncomment one of these lines to test the ResultScreen:
@@ -65,28 +68,51 @@ export default function Numbler() {
     });
   };
 
-  const handleShare = () => {
+  const handleShare = async () => {
     const resultData = generateShareResultData(
       gameState,
       getCurrentPuzzleNumber()
     );
     const shareUrl = generateShareUrl(resultData);
 
-    // For now, copy to clipboard and show toast
-    // TODO: Integrate with Farcaster miniapp SDK for native sharing
-    navigator.clipboard
-      .writeText(`${resultData.text}\n\n${shareUrl}`)
-      .then(() => {
+    // Try native Farcaster sharing first
+    if (isMiniAppReady && context) {
+      try {
+        // Use openUrl to open the Farcaster compose dialog
+        const composeUrl = `https://warpcast.com/~/compose?text=${encodeURIComponent(
+          resultData.text
+        )}&embeds[]=${encodeURIComponent(shareUrl)}`;
+        await sdk.actions.openUrl(composeUrl);
+
         toast({
-          title: '📱 Copied to clipboard!',
-          description: 'Share your result on Farcaster',
+          title: '🚀 Opening Farcaster composer...',
+          description: 'Share your result from the compose dialog',
           duration: 3000,
         });
-      })
-      .catch(() => {
-        // Fallback: open share URL directly
-        window.open(shareUrl, '_blank');
+        return;
+      } catch (error) {
+        console.error('Native sharing failed:', error);
+        // Fall through to clipboard fallback
+      }
+    }
+
+    // Fallback: copy to clipboard
+    try {
+      await navigator.clipboard.writeText(`${resultData.text}\n\n${shareUrl}`);
+      toast({
+        title: '📱 Copied to clipboard!',
+        description: 'Paste in Farcaster to share your result',
+        duration: 3000,
       });
+    } catch (clipboardError) {
+      // Final fallback: open share URL directly
+      window.open(shareUrl, '_blank');
+      toast({
+        title: '🔗 Share link opened',
+        description: 'Share your result from the new tab',
+        duration: 3000,
+      });
+    }
   };
 
   const handleKeyPress = (key: string) => {
