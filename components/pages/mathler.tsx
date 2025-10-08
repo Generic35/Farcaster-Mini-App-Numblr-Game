@@ -75,6 +75,14 @@ export default function Numbler() {
     );
     const shareUrl = generateShareUrl(resultData);
 
+    // 🐛 DEBUG - Check what data is being passed
+    console.log('🐛 DEBUG - Share Data:', {
+      gameState,
+      puzzleNumber: getCurrentPuzzleNumber(),
+      resultData,
+      shareUrl,
+    });
+
     // Try native Farcaster sharing first
     if (isMiniAppReady && context) {
       try {
