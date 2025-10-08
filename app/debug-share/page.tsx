@@ -145,19 +145,22 @@ export default function DebugSharePage() {
               </h3>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {Array.from(debugOutput.ogImageParams.entries()).map(
-                  ([key, value]: [string, string]) => (
-                    <div
-                      key={key}
-                      className="bg-gray-100 dark:bg-gray-700 p-3 rounded"
-                    >
-                      <div className="font-semibold text-gray-900 dark:text-white">
-                        {key}:
+                  (entry, index) => {
+                    const [key, value] = entry as [string, string];
+                    return (
+                      <div
+                        key={key}
+                        className="bg-gray-100 dark:bg-gray-700 p-3 rounded"
+                      >
+                        <div className="font-semibold text-gray-900 dark:text-white">
+                          {key}:
+                        </div>
+                        <div className="text-sm break-all text-gray-700 dark:text-gray-300">
+                          {value}
+                        </div>
                       </div>
-                      <div className="text-sm break-all text-gray-700 dark:text-gray-300">
-                        {value}
-                      </div>
-                    </div>
-                  )
+                    );
+                  }
                 )}
               </div>
             </div>
