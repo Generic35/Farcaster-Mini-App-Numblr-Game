@@ -86,7 +86,7 @@ export function ResultScreen({
                 <p className="text-sm text-muted-foreground mb-1">
                   The correct equation was:
                 </p>
-                <p className="text-lg font-mono font-bold text-black dark:text-white">
+                <p className="text-lg font-mono font-bold text-black">
                   {solution} = {targetNumber}
                 </p>
               </div>
