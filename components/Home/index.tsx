@@ -2,17 +2,16 @@
 
 import { useUser } from '@/contexts/user-context';
 import Image from 'next/image';
-import { useAccount } from 'wagmi';
-import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 export default function Home() {
   const { user, isLoading, error, signIn } = useUser();
-
-  const { address } = useAccount();
   const router = useRouter();
   const [isNavigating, setIsNavigating] = useState(false);
+
+  // Get user's custody address from Farcaster profile
+  const userAddress = user?.data?.custody_address;
 
   const handlePlayClick = () => {
     setIsNavigating(true);
@@ -27,11 +26,13 @@ export default function Home() {
           {user?.data ? 'You are signed in!' : 'Sign in to get started'}
         </p>
         <p className="text-lg text-muted-foreground">
-          {address
-            ? `${address.substring(0, 6)}...${address.substring(
-                address.length - 4
+          {userAddress
+            ? `${userAddress.substring(0, 6)}...${userAddress.substring(
+                userAddress.length - 4
               )}`
-            : 'No address found'}
+            : user?.data
+            ? 'No address found'
+            : 'Sign in to see your address'}
         </p>
 
         {!user?.data ? (
