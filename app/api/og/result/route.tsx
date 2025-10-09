@@ -20,26 +20,15 @@ export async function GET(request: Request) {
   try {
     // Parse URL parameters
     const { searchParams } = new URL(request.url);
-    const attempts = searchParams.get('attempts') || '6';
-    const grid = searchParams.get('grid') || '🟩🟨⬜⬜⬜';
-    const puzzleNumber = searchParams.get('puzzleNumber') || '1';
+    const attempts = searchParams.get('attempts') || '2';
+    const puzzleNumber = searchParams.get('puzzleNumber') || '282';
     const won = searchParams.get('won') === 'true';
 
-    // Get the application's base URL from environment variables
-    const appUrl = env.NEXT_PUBLIC_URL;
-
-    // Load the logo image from the public directory
-    const logoImage = await loadImage(`${appUrl}/images/icon.png`);
-
-    // Prepare text for font loading
-    const displayText = `Numbler #${puzzleNumber} ${won ? attempts : 'X'}/6`;
-    const fontData = await loadGoogleFont(
-      'Inter:wght@400;600;700',
-      displayText
-    );
-
-    // Split grid into rows (assuming newlines separate rows)
-    const gridRows = grid.split('\n').filter((row) => row.length > 0);
+    // Create simple test grid - no emoji parsing for now
+    const testGrid = [
+      ['gray', 'green', 'gray', 'green', 'yellow'],
+      ['green', 'green', 'green', 'green', 'green'],
+    ];
 
     // Generate and return the image response
     return new ImageResponse(
@@ -49,114 +38,364 @@ export async function GET(request: Request) {
             height: '100%',
             width: '100%',
             display: 'flex',
-            flexDirection: 'column',
-            justifyContent: 'center',
-            alignItems: 'center',
-            position: 'relative',
-            background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+            backgroundColor: 'white',
             padding: '40px',
           }}
         >
-          {/* Main content container */}
+          {/* Left side - Simple grid placeholder */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
+              justifyContent: 'center',
               alignItems: 'center',
-              backgroundColor: 'white',
-              borderRadius: '20px',
-              padding: '30px',
-              boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-              gap: '20px',
+              flex: 1,
             }}
           >
-            {/* Logo */}
-            <img
-              src={`data:image/png;base64,${Buffer.from(logoImage).toString(
-                'base64'
-              )}`}
-              style={{
-                width: '60px',
-                height: '60px',
-                borderRadius: '10px',
-              }}
-            />
-
-            {/* Title */}
-            <div
-              style={{
-                color: '#1a1a1a',
-                fontSize: 24,
-                fontFamily: 'Inter',
-                fontWeight: 700,
-                textAlign: 'center',
-              }}
-            >
-              {displayText}
-            </div>
-
-            {/* Result status */}
-            <div
-              style={{
-                color: won ? '#22c55e' : '#ef4444',
-                fontSize: 18,
-                fontFamily: 'Inter',
-                fontWeight: 600,
-                textAlign: 'center',
-              }}
-            >
-              {won ? '🎉 Solved!' : '😅 Better luck tomorrow!'}
-            </div>
-
-            {/* Grid display */}
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                alignItems: 'center',
+                gap: '3px',
               }}
             >
-              {gridRows.map((row, index) => (
+              {/* Row 1 */}
+              <div style={{ display: 'flex', gap: '3px' }}>
                 <div
-                  key={index}
                   style={{
-                    display: 'flex',
-                    gap: '2px',
-                    fontSize: '20px',
-                    letterSpacing: '2px',
-                    lineHeight: '1',
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#d1d5db',
+                    borderRadius: '3px',
                   }}
-                >
-                  {row}
-                </div>
-              ))}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#eab308',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#eab308',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#eab308',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#eab308',
+                    borderRadius: '3px',
+                  }}
+                />
+              </div>
+              {/* Row 2 */}
+              <div style={{ display: 'flex', gap: '3px' }}>
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#d1d5db',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#eab308',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#eab308',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '3px',
+                  }}
+                />
+              </div>
+              {/* Row 3 */}
+              <div style={{ display: 'flex', gap: '3px' }}>
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '3px',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: '#22c55e',
+                    borderRadius: '3px',
+                  }}
+                />
+              </div>
+              {/* Row 4 - Empty */}
+              <div style={{ display: 'flex', gap: '3px' }}>
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+              </div>
+              {/* Row 5 - Empty */}
+              <div style={{ display: 'flex', gap: '3px' }}>
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+              </div>
+              {/* Row 6 - Empty */}
+              <div style={{ display: 'flex', gap: '3px' }}>
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+                <div
+                  style={{
+                    width: '28px',
+                    height: '28px',
+                    backgroundColor: 'white',
+                    borderRadius: '3px',
+                    border: '1px solid #d1d5db',
+                  }}
+                />
+              </div>
             </div>
+          </div>
 
-            {/* Call to action */}
+          {/* Right side - Stats */}
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'center',
+              alignItems: 'center',
+              flex: 1,
+              paddingLeft: '20px',
+              textAlign: 'center',
+            }}
+          >
             <div
               style={{
-                color: '#6b7280',
-                fontSize: 14,
-                fontFamily: 'Inter',
-                fontWeight: 400,
-                textAlign: 'center',
-                marginTop: '10px',
+                fontSize: 28,
+                fontWeight: 800,
+                color: '#000000',
+                marginBottom: '8px',
+                display: 'flex',
+                justifyContent: 'center',
+                alignItems: 'center',
+                gap: '8px',
               }}
             >
-              Can you solve today&apos;s puzzle?
+              <span>Numbler</span>
+              <span style={{ color: '#16a34a' }}>PRO</span>
+            </div>
+            <div
+              style={{
+                fontSize: 11,
+                color: '#6b7280',
+                marginBottom: '16px',
+              }}
+            >
+              2025-10-09
+            </div>
+            <div
+              style={{
+                fontSize: 22,
+                fontWeight: 700,
+                color: '#16a34a',
+                marginBottom: '16px',
+              }}
+            >
+              Solved in 2 attempts! 🏆
+            </div>
+            <div
+              style={{
+                fontSize: 16,
+                fontWeight: 600,
+                color: '#1f2937',
+              }}
+            >
+              Can YOU beat this?
             </div>
           </div>
         </div>
       ),
       {
-        ...size,
-        fonts: [
-          {
-            name: 'Inter',
-            data: fontData,
-            style: 'normal',
-          },
-        ],
+        width: 600,
+        height: 400,
       }
     );
   } catch (e) {
