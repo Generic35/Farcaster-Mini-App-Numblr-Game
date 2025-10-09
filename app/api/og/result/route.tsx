@@ -113,7 +113,6 @@ export async function GET(request: Request) {
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '4px',
                 alignItems: 'center',
               }}
             >
@@ -122,9 +121,10 @@ export async function GET(request: Request) {
                   key={index}
                   style={{
                     display: 'flex',
-                    gap: '4px',
+                    gap: '2px',
                     fontSize: '20px',
                     letterSpacing: '2px',
+                    lineHeight: '1',
                   }}
                 >
                   {row}

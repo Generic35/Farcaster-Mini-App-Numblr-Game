@@ -64,6 +64,8 @@
   --tile-incorrect-border: hsl(240 5% 55%);
   --tile-filled: hsl(240 5% 96%);
   --tile-filled-border: hsl(240 6% 70%);
+  --tile-empty: transparent;
+  --tile-empty-border: hsl(240 5% 70%);
 }
 /* :root {
   --foreground-rgb: 0, 0, 0;
@@ -94,6 +96,8 @@
 
   --tile-filled: hsl(240 5% 20%); /* Dark gray instead of light */
   --tile-filled-border: hsl(240 6% 40%); /* Lighter border for contrast */
+  --tile-empty: transparent;
+  --tile-empty-border: hsl(240 5% 40%);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -142,5 +146,11 @@ body {
 .tile-filled {
   background-color: var(--tile-filled);
   border-color: var(--tile-filled-border);
+  color: var(--foreground);
+}
+
+.tile-empty {
+  background-color: var(--tile-empty);
+  border-color: var(--tile-empty-border);
   color: var(--foreground);
 }

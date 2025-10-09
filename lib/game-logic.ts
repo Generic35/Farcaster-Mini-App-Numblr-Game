@@ -228,6 +228,21 @@ export interface ShareResultData {
   puzzleNumber: number;
 }
 
+// For text sharing (cast text)
+function tileStateToTextEmoji(state: TileState): string {
+  switch (state) {
+    case 'correct':
+      return '🟩';
+    case 'partial':
+      return '🟨';
+    case 'incorrect':
+      return '⬛'; // black square for text grid
+    default:
+      return '⬛'; // fallback for empty/filled states - black square for text grid
+  }
+}
+
+// For OG image generation (Frame image)
 function tileStateToEmoji(state: TileState): string {
   switch (state) {
     case 'correct':
@@ -235,9 +250,9 @@ function tileStateToEmoji(state: TileState): string {
     case 'partial':
       return '🟨';
     case 'incorrect':
-      return '⬜';
+      return '⬜'; // white square for OG image
     default:
-      return '⬜'; // fallback for empty/filled states
+      return '⬜'; // fallback for empty/filled states - white square for OG image
   }
 }
 
@@ -248,15 +263,20 @@ export function generateShareResultData(
   // Only include completed rows (up to currentRow)
   const completedRows = gameState.tileStates.slice(0, gameState.currentRow);
 
-  // Convert tile states to emoji grid
+  // Convert tile states to emoji grid for OG image (Frame)
   const grid = completedRows
     .map(row => row.map(tileStateToEmoji).join(''))
     .join('\n');
 
+  // Convert tile states to emoji grid for text sharing (cast text)
+  const textGrid = completedRows
+    .map(row => row.map(tileStateToTextEmoji).join(''))
+    .join('\n');
+
   // Generate the shareable text with engaging human-readable format
   const text = gameState.gameWon
-    ? `🎲 I just solved Numbler #${puzzleNumber} in ${gameState.currentRow} attempts!\n\nThink you can beat me?\n\n${grid}`
-    : `🎲 I couldn't solve Numbler #${puzzleNumber} today... better luck next time!\n\nCan you solve it?\n\n${grid}`;
+    ? `🎲 I just solved Numbler #${puzzleNumber} in ${gameState.currentRow} attempts!\n\nThink you can beat me???\n\n${textGrid}`
+    : `🎲 I couldn't solve Numbler #${puzzleNumber} today... better luck next time!\n\nCan you solve it???\n\n${textGrid}`;
 
   return {
     text,

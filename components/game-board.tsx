@@ -27,7 +27,7 @@ function Tile({ character, state }: TileProps) {
       case 'filled':
         return `${baseClasses} tile-filled`;
       default:
-        return `${baseClasses} border-border bg-card`;
+        return `${baseClasses} tile-empty`;
     }
   };
 
