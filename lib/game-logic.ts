@@ -253,9 +253,10 @@ export function generateShareResultData(
     .map(row => row.map(tileStateToEmoji).join(''))
     .join('\n');
 
-  // Generate the shareable text
-  const status = gameState.gameWon ? gameState.currentRow : 'X';
-  const text = `🎲 Numbler #${puzzleNumber} ${status}/6\n\n${grid}`;
+  // Generate the shareable text with engaging human-readable format
+  const text = gameState.gameWon
+    ? `🎲 I just solved Numbler #${puzzleNumber} in ${gameState.currentRow} attempts!\n\nThink you can beat me?\n\n${grid}`
+    : `🎲 I couldn't solve Numbler #${puzzleNumber} today... better luck next time!\n\nCan you solve it?\n\n${grid}`;
 
   return {
     text,

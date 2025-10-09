@@ -77,3 +77,4 @@ function debugShareGeneration() {
 
 // Run the debug function
 debugShareGeneration();
+
