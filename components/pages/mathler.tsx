@@ -257,12 +257,12 @@ export default function Numbler() {
 
   return (
     <div
-      className="container mx-auto px-4 py-8 max-w-lg"
+      className="container mx-auto px-4 py-4 max-w-lg min-h-screen flex flex-col"
       data-testid="numbler-game"
     >
       {/* Game Header */}
       <header
-        className="text-center mb-6"
+        className="text-center mb-4"
         data-testid="game-header"
       >
         <h1 className="text-3xl font-bold mb-4">Numbler</h1>
@@ -280,8 +280,8 @@ export default function Numbler() {
         </div>
       </header>
 
-      {/* Game Area Container - Fixed height to prevent content jumping */}
-      <div className="min-h-[380px] flex flex-col justify-center items-center space-y-4">
+      {/* Game Area Container - Optimized for mobile viewport */}
+      <div className="flex flex-col items-center space-y-2">
         {/* Conditional: Show Result Screen or Game Board */}
         {gameState.gameWon || gameState.gameLost ? (
           <ResultScreen
@@ -296,6 +296,22 @@ export default function Numbler() {
           />
         ) : (
           <>
+            {/* Color Legend - Above game board with minimal padding */}
+            <div className="flex justify-center gap-4 text-xs text-muted-foreground mb-1">
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 tile-correct rounded"></div>
+                <span>Correct</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 tile-partial rounded"></div>
+                <span>Wrong spot</span>
+              </div>
+              <div className="flex items-center gap-1">
+                <div className="w-4 h-4 tile-incorrect rounded"></div>
+                <span>Not in answer</span>
+              </div>
+            </div>
+
             <GameBoard
               guesses={gameState.guesses}
               currentGuess={gameState.currentGuess}
@@ -312,53 +328,6 @@ export default function Numbler() {
           </>
         )}
       </div>
-
-      {/* Game Instructions - Only show during active game */}
-      {!gameState.gameWon && !gameState.gameLost && (
-        <div
-          className="text-center"
-          data-testid="game-instructions"
-        >
-          <div className="text-sm text-muted-foreground mb-3">
-            <p>Enter a math equation that equals {currentPuzzle.target}</p>
-            <p>Use numbers (0-9) and operators (+, -, ×, ÷)</p>
-          </div>
-
-          {/* Color Legend */}
-          <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 tile-correct rounded"></div>
-              <span>Correct</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 tile-partial rounded"></div>
-              <span>Wrong spot</span>
-            </div>
-            <div className="flex items-center gap-1">
-              <div className="w-4 h-4 tile-incorrect rounded"></div>
-              <span>Not in answer</span>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* Current Difficulty Label - Only show when game is active */}
-      {!gameState.gameWon && !gameState.gameLost && (
-        <div className="flex flex-col items-center mt-4 gap-2">
-          <p
-            className={`text-sm font-semibold ${difficultyColors[difficulty]}`}
-          >
-            Current: {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-          </p>
-          <button
-            onClick={handleNextPuzzle}
-            className="px-6 py-3 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md"
-          >
-            Next:{' '}
-            {nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1)}
-          </button>
-        </div>
-      )}
     </div>
   );
 }
