@@ -24,11 +24,24 @@ export async function GET(request: Request) {
     const puzzleNumber = searchParams.get('puzzleNumber') || '282';
     const won = searchParams.get('won') === 'true';
 
-    // Create simple test grid - no emoji parsing for now
-    const testGrid = [
-      ['gray', 'green', 'gray', 'green', 'yellow'],
-      ['green', 'green', 'green', 'green', 'green'],
-    ];
+    // Parse the actual grid from URL parameters
+    const gridParam = searchParams.get('grid') || '🟩🟩🟩🟩🟩';
+    const gridRows = gridParam.split('\n').filter((row) => row.length > 0);
+
+    // Convert emoji grid to color grid
+    const colorGrid = gridRows.map((row) =>
+      Array.from(row).map((char) => {
+        if (char === '🟩') return 'green';
+        if (char === '🟨') return 'yellow';
+        if (char === '⬜') return 'gray';
+        return 'empty';
+      })
+    );
+
+    // Pad to 6 rows for display
+    while (colorGrid.length < 6) {
+      colorGrid.push(['empty', 'empty', 'empty', 'empty', 'empty']);
+    }
 
     // Generate and return the image response
     return new ImageResponse(
@@ -59,279 +72,41 @@ export async function GET(request: Request) {
                 gap: '3px',
               }}
             >
-              {/* Row 1 */}
-              <div style={{ display: 'flex', gap: '3px' }}>
+              {colorGrid.map((row, rowIndex) => (
                 <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#d1d5db',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#eab308',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#eab308',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#eab308',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#eab308',
-                    borderRadius: '3px',
-                  }}
-                />
-              </div>
-              {/* Row 2 */}
-              <div style={{ display: 'flex', gap: '3px' }}>
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#d1d5db',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#eab308',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#eab308',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '3px',
-                  }}
-                />
-              </div>
-              {/* Row 3 */}
-              <div style={{ display: 'flex', gap: '3px' }}>
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '3px',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: '#22c55e',
-                    borderRadius: '3px',
-                  }}
-                />
-              </div>
-              {/* Row 4 - Empty */}
-              <div style={{ display: 'flex', gap: '3px' }}>
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-              </div>
-              {/* Row 5 - Empty */}
-              <div style={{ display: 'flex', gap: '3px' }}>
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-              </div>
-              {/* Row 6 - Empty */}
-              <div style={{ display: 'flex', gap: '3px' }}>
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-                <div
-                  style={{
-                    width: '28px',
-                    height: '28px',
-                    backgroundColor: 'white',
-                    borderRadius: '3px',
-                    border: '1px solid #d1d5db',
-                  }}
-                />
-              </div>
+                  key={rowIndex}
+                  style={{ display: 'flex', gap: '3px' }}
+                >
+                  {row.map((color, colIndex) => {
+                    let backgroundColor = '#f3f4f6';
+                    let border = 'none';
+
+                    if (color === 'green') {
+                      backgroundColor = '#22c55e';
+                    } else if (color === 'yellow') {
+                      backgroundColor = '#eab308';
+                    } else if (color === 'gray') {
+                      backgroundColor = '#d1d5db';
+                    } else if (color === 'empty') {
+                      backgroundColor = 'white';
+                      border = '1px solid #d1d5db';
+                    }
+
+                    return (
+                      <div
+                        key={colIndex}
+                        style={{
+                          width: '28px',
+                          height: '28px',
+                          backgroundColor,
+                          borderRadius: '3px',
+                          border,
+                        }}
+                      />
+                    );
+                  })}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -369,7 +144,7 @@ export async function GET(request: Request) {
                 marginBottom: '16px',
               }}
             >
-              2025-10-09
+              {new Date().toISOString().split('T')[0]}
             </div>
             <div
               style={{
@@ -379,7 +154,11 @@ export async function GET(request: Request) {
                 marginBottom: '16px',
               }}
             >
-              Solved in 2 attempts! 🏆
+              {won
+                ? `Solved in ${attempts} attempt${
+                    attempts === '1' ? '' : 's'
+                  }! 🏆`
+                : `Better luck next time! 😔`}
             </div>
             <div
               style={{
