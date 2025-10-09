@@ -84,7 +84,7 @@ export function GameBoard({
   };
 
   return (
-    <div className="my-6 flex justify-center">
+    <div className="flex justify-center">
       <div
         className="grid grid-rows-6 gap-2 w-fit"
         data-testid="game-board"

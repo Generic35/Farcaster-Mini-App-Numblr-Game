@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { GameState, Difficulty } from '@/lib/game-logic';
+import { GameBoard } from '@/components/game-board';
 
 interface ResultScreenProps {
   gameState: GameState;
@@ -46,116 +47,51 @@ export function ResultScreen({
 
   return (
     <div
-      className="text-center space-y-6 mb-6"
+      className="text-center space-y-6 flex-1 flex flex-col justify-center"
       data-testid="result-screen"
     >
-      {/* Result Header */}
-      <div className="space-y-2">
-        {isWin ? (
-          <>
-            <div className="text-6xl">🎉</div>
-            <h2 className="text-2xl font-bold text-green-600">
-              Congratulations!
-            </h2>
-            <p className="text-lg text-muted-foreground">
-              You solved Numbler #{puzzleNumber} in {attempts}/6 attempts!
-            </p>
-          </>
-        ) : (
-          <>
-            <div className="text-6xl">😔</div>
-            <h2 className="text-2xl font-bold text-red-600">Game Over</h2>
-            <p className="text-lg text-muted-foreground">
-              Better luck next time!
-            </p>
-            <div className="bg-card border border-border rounded-lg p-4">
-              <p className="text-sm text-muted-foreground mb-1">
-                The correct equation was:
-              </p>
-              <p className="text-xl font-mono font-bold">
-                {solution} = {targetNumber}
-              </p>
-            </div>
-          </>
-        )}
-      </div>
-
-      {/* Action Buttons */}
-      <div className="space-y-3">
-        {/* Share Button - Primary Action */}
+      {/* Prominent Share Button - Replaces game board position */}
+      <div className="space-y-6">
+        {/* Large Share Button - Primary Action */}
         <button
           onClick={handleShareClick}
           disabled={isSharing}
-          className="w-full px-6 py-4 bg-blue-600 text-white font-semibold rounded-lg hover:bg-blue-700 active:scale-95 transition-all shadow-md text-lg disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
+          className="w-full px-8 py-6 bg-blue-600 text-white font-bold rounded-xl hover:bg-blue-700 active:scale-95 transition-all shadow-lg text-xl disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none"
           data-testid="share-result-button"
         >
           {isSharing ? (
             <>
-              <span className="inline-block animate-spin mr-2">⏳</span>
+              <span className="inline-block animate-spin mr-3">⏳</span>
               Sharing...
             </>
           ) : (
-            <>🚀 Share to Farcaster</>
+            <>🚀 Share Your Result</>
           )}
         </button>
 
-        {/* Next Puzzle Button - Secondary Action */}
-        <button
-          onClick={onNextPuzzle}
-          className="w-full px-6 py-3 bg-gray-600 text-white font-semibold rounded-lg hover:bg-gray-700 active:scale-95 transition-all shadow-md"
-          data-testid="next-puzzle-button"
-        >
-          🎲 Next Puzzle
-        </button>
-      </div>
-
-      {/* Game Stats */}
-      <div className="bg-card border border-border rounded-lg p-4">
-        <h3 className="font-semibold mb-3">Game Summary</h3>
-        <div className="grid grid-cols-2 gap-4 text-sm">
-          <div>
-            <p className="text-muted-foreground">Puzzle</p>
-            <p className="font-semibold text-foreground">#{puzzleNumber}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Target</p>
-            <p className="font-semibold text-foreground">{targetNumber}</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Attempts</p>
-            <p className="font-semibold text-foreground">{attempts}/6</p>
-          </div>
-          <div>
-            <p className="text-muted-foreground">Result</p>
-            <p
-              className={`font-semibold ${
-                isWin ? 'text-green-600' : 'text-red-600'
-              }`}
-            >
-              {isWin ? 'Won' : 'Lost'}
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* 🧪 TEMPORARY DEBUG INFO - Remove before production */}
-      <div className="mt-4 p-3 bg-gray-100 dark:bg-gray-800 rounded-lg border-2 border-dashed border-gray-300 dark:border-gray-600">
-        <p className="text-xs text-gray-600 dark:text-gray-400 text-center mb-2">
-          🧪 DEBUG INFO (temporary)
-        </p>
-        <div className="flex justify-center gap-6 text-sm">
-          <div className="text-center">
-            <p className="text-gray-500 text-xs">Current</p>
-            <p className={`font-semibold ${difficultyColors[difficulty]}`}>
-              {difficulty.charAt(0).toUpperCase() + difficulty.slice(1)}
-            </p>
-          </div>
-          <div className="text-center">
-            <p className="text-gray-500 text-xs">Next</p>
-            <p className={`font-semibold ${difficultyColors[nextDifficulty]}`}>
-              {nextDifficulty.charAt(0).toUpperCase() + nextDifficulty.slice(1)}
-            </p>
-          </div>
+        {/* Result Summary - Compact */}
+        <div className="text-center space-y-2">
+          {isWin ? (
+            <>
+              <div className="text-4xl">🎉</div>
+              <h2 className="text-xl font-bold text-green-600">
+                Solved in {attempts}/6!
+              </h2>
+            </>
+          ) : (
+            <>
+              <div className="text-4xl">😔</div>
+              <h2 className="text-xl font-bold text-red-600">Game Over</h2>
+              <div className="bg-card border border-border rounded-lg p-3 mt-2">
+                <p className="text-sm text-muted-foreground mb-1">
+                  The correct equation was:
+                </p>
+                <p className="text-lg font-mono font-bold text-black dark:text-white">
+                  {solution} = {targetNumber}
+                </p>
+              </div>
+            </>
+          )}
         </div>
       </div>
     </div>

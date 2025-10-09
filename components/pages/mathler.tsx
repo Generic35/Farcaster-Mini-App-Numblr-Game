@@ -176,12 +176,6 @@ export default function Numbler() {
             spread: 70,
             origin: { y: 0.6 },
           });
-
-          toast({
-            title: '🎉 Congratulations!',
-            description: 'You solved it!',
-            duration: 2000,
-          });
         }, 500);
       } else if (isLoss) {
         setTimeout(() => {
@@ -286,60 +280,67 @@ export default function Numbler() {
         </div>
       </header>
 
-      {/* Game Board */}
-      <GameBoard
-        guesses={gameState.guesses}
-        currentGuess={gameState.currentGuess}
-        currentRow={gameState.currentRow}
-        tileStates={gameState.tileStates}
-      />
+      {/* Game Area Container - Fixed height to prevent content jumping */}
+      <div className="min-h-[380px] flex flex-col justify-center items-center space-y-4">
+        {/* Conditional: Show Result Screen or Game Board */}
+        {gameState.gameWon || gameState.gameLost ? (
+          <ResultScreen
+            gameState={gameState}
+            puzzleNumber={getCurrentPuzzleNumber()}
+            targetNumber={currentPuzzle.target}
+            solution={currentPuzzle.solution}
+            difficulty={difficulty}
+            nextDifficulty={nextDifficulty}
+            onShare={handleShare}
+            onNextPuzzle={handleNextPuzzle}
+          />
+        ) : (
+          <>
+            <GameBoard
+              guesses={gameState.guesses}
+              currentGuess={gameState.currentGuess}
+              currentRow={gameState.currentRow}
+              tileStates={gameState.tileStates}
+            />
 
-      {/* Conditional: Show Result Screen or Keypad */}
-      {gameState.gameWon || gameState.gameLost ? (
-        <ResultScreen
-          gameState={gameState}
-          puzzleNumber={getCurrentPuzzleNumber()}
-          targetNumber={currentPuzzle.target}
-          solution={currentPuzzle.solution}
-          difficulty={difficulty}
-          nextDifficulty={nextDifficulty}
-          onShare={handleShare}
-          onNextPuzzle={handleNextPuzzle}
-        />
-      ) : (
-        <Keypad
-          onKeyPress={handleKeyPress}
-          onBackspace={handleBackspace}
-          onSubmit={handleSubmit}
-        />
-      )}
-
-      {/* Game Instructions */}
-      <div
-        className="text-center"
-        data-testid="game-instructions"
-      >
-        <div className="text-sm text-muted-foreground mb-3">
-          <p>Enter a math equation that equals {currentPuzzle.target}</p>
-          <p>Use numbers (0-9) and operators (+, -, ×, ÷)</p>
-        </div>
-
-        {/* Color Legend */}
-        <div className="flex justify-center gap-4 text-xs text-muted-foreground">
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 tile-correct rounded"></div>
-            <span>Correct</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 tile-partial rounded"></div>
-            <span>Wrong spot</span>
-          </div>
-          <div className="flex items-center gap-1">
-            <div className="w-4 h-4 tile-incorrect rounded"></div>
-            <span>Not in answer</span>
-          </div>
-        </div>
+            {/* Keypad - Integrated into game area */}
+            <Keypad
+              onKeyPress={handleKeyPress}
+              onBackspace={handleBackspace}
+              onSubmit={handleSubmit}
+            />
+          </>
+        )}
       </div>
+
+      {/* Game Instructions - Only show during active game */}
+      {!gameState.gameWon && !gameState.gameLost && (
+        <div
+          className="text-center"
+          data-testid="game-instructions"
+        >
+          <div className="text-sm text-muted-foreground mb-3">
+            <p>Enter a math equation that equals {currentPuzzle.target}</p>
+            <p>Use numbers (0-9) and operators (+, -, ×, ÷)</p>
+          </div>
+
+          {/* Color Legend */}
+          <div className="flex justify-center gap-4 text-xs text-muted-foreground">
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 tile-correct rounded"></div>
+              <span>Correct</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 tile-partial rounded"></div>
+              <span>Wrong spot</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <div className="w-4 h-4 tile-incorrect rounded"></div>
+              <span>Not in answer</span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Current Difficulty Label - Only show when game is active */}
       {!gameState.gameWon && !gameState.gameLost && (
