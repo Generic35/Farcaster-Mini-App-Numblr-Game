@@ -281,7 +281,7 @@ export default function Numbler() {
       </header>
 
       {/* Game Area Container - Optimized for mobile viewport */}
-      <div className="flex flex-col items-center space-y-2">
+      <div className="flex flex-col items-center space-y-2 flex-1">
         {/* Conditional: Show Result Screen or Game Board */}
         {gameState.gameWon || gameState.gameLost ? (
           <ResultScreen
