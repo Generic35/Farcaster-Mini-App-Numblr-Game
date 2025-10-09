@@ -18,6 +18,16 @@ export default function Home() {
     router.push('/game');
   };
 
+  const handleSignInClick = async () => {
+    console.log('🔐 Sign in button clicked');
+    try {
+      await signIn();
+      console.log('✅ Sign in completed');
+    } catch (error) {
+      console.error('❌ Sign in failed:', error);
+    }
+  };
+
   return (
     <div className="bg-white text-black flex min-h-screen flex-col items-center justify-center p-4">
       <div className="text-center space-y-4">
@@ -36,20 +46,22 @@ export default function Home() {
         </p>
 
         {!user?.data ? (
-          <button
-            onClick={signIn}
-            disabled={isLoading}
-            className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2 min-w-[160px] min-h-[48px]"
-          >
-            {isLoading ? (
-              <>
-                <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
-                <span>Signing in...</span>
-              </>
-            ) : (
-              'Sign in'
-            )}
-          </button>
+          <div className="flex justify-center">
+            <button
+              onClick={handleSignInClick}
+              disabled={isLoading}
+              className="px-6 py-3 bg-purple-600 text-white font-semibold rounded-lg shadow-md hover:bg-purple-700 focus:outline-none focus:ring-2 focus:ring-purple-500 focus:ring-opacity-50 disabled:opacity-50 disabled:cursor-not-allowed transition-colors duration-200 flex items-center justify-center space-x-2 min-w-[160px] min-h-[48px]"
+            >
+              {isLoading ? (
+                <>
+                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white" />
+                  <span>Signing in...</span>
+                </>
+              ) : (
+                'Sign in'
+              )}
+            </button>
+          </div>
         ) : (
           <div className="space-y-4">
             {user && (
