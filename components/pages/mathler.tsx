@@ -24,6 +24,9 @@ import {
   generateShareUrl,
 } from '@/lib/game-logic';
 
+// 🧪 DEV: Import storage tests (remove in production)
+import { testStorageUtilities, quickStorageTest } from '@/lib/test-storage';
+
 // Rotate difficulty: Easy → Medium → Hard → Easy...
 function getDifficultyForDay(dayOffset: number): Difficulty {
   const difficulties: Difficulty[] = ['easy', 'medium', 'hard'];
@@ -48,6 +51,63 @@ export default function Numbler() {
   // Uncomment one of these lines to test the ResultScreen:
   // const [gameState, setGameState] = useState<GameState>({...createInitialGameState(), gameWon: true, currentRow: 3});
   // const [gameState, setGameState] = useState<GameState>({...createInitialGameState(), gameLost: true, currentRow: 6});
+
+  // 💾 PERSISTENCE: Load saved game state on component mount
+  useEffect(() => {
+    const loadSavedGameState = async () => {
+      try {
+        const { loadGameState, clearOldGameStates } = await import(
+          '@/lib/storage'
+        );
+
+        // Clean up old puzzle data first
+        clearOldGameStates();
+
+        const currentPuzzleNumber = getCurrentPuzzleNumber();
+        const savedState = loadGameState(currentPuzzleNumber);
+
+        if (savedState) {
+          console.log(
+            '💾 Loaded and validated saved game state for puzzle #' +
+              currentPuzzleNumber
+          );
+          setGameState(savedState);
+        } else {
+          console.log(
+            '🆕 No saved state found, starting fresh puzzle #' +
+              currentPuzzleNumber
+          );
+        }
+      } catch (error) {
+        console.error('Failed to load saved game state:', error);
+        // Continue with fresh state if loading fails
+      }
+    };
+
+    loadSavedGameState();
+  }, []);
+
+  // 💾 PERSISTENCE: Auto-save game state whenever it changes
+  useEffect(() => {
+    const saveCurrentGameState = async () => {
+      try {
+        const { saveGameState } = await import('@/lib/storage');
+        const currentPuzzleNumber = getCurrentPuzzleNumber();
+
+        // Only save if the game has actually started (has guesses or current guess)
+        if (gameState.guesses.length > 0 || gameState.currentGuess.length > 0) {
+          const saved = saveGameState(currentPuzzleNumber, gameState);
+          if (saved) {
+            console.log('💾 Auto-saved game state');
+          }
+        }
+      } catch (error) {
+        console.error('Failed to auto-save game state:', error);
+      }
+    };
+
+    saveCurrentGameState();
+  }, [gameState]); // Triggers whenever gameState changes
 
   const handleNextPuzzle = () => {
     const nextDayOffset = currentDayOffset + 1;

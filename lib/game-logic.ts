@@ -309,3 +309,191 @@ export function generateShareUrl(resultData: ShareResultData): string {
 
   return `${appUrl}/share/${encodedData}`;
 }
+
+// ===== VALIDATION FUNCTIONS FOR PERSISTENCE =====
+
+/**
+ * Validate that a loaded game state has the correct structure and values
+ */
+export function isValidGameState(gameState: any): gameState is GameState {
+  if (!gameState || typeof gameState !== 'object') {
+    console.warn('Invalid game state: not an object');
+    return false;
+  }
+
+  // Check all required properties exist with correct types
+  const requiredProps = {
+    currentGuess: 'string',
+    guesses: 'object', // array
+    currentRow: 'number',
+    gameWon: 'boolean',
+    gameLost: 'boolean',
+    tileStates: 'object' // array
+  };
+
+  for (const [prop, expectedType] of Object.entries(requiredProps)) {
+    if (!(prop in gameState) || typeof gameState[prop] !== expectedType) {
+      console.warn(`Invalid game state: ${prop} is missing or wrong type`);
+      return false;
+    }
+  }
+
+  // Validate arrays are actually arrays
+  if (!Array.isArray(gameState.guesses) || !Array.isArray(gameState.tileStates)) {
+    console.warn('Invalid game state: guesses or tileStates not arrays');
+    return false;
+  }
+
+  // Validate currentRow is within bounds (0-6)
+  if (gameState.currentRow < 0 || gameState.currentRow > 6) {
+    console.warn(`Invalid game state: currentRow ${gameState.currentRow} out of bounds`);
+    return false;
+  }
+
+  // Validate guesses array length matches currentRow
+  if (gameState.guesses.length !== gameState.currentRow) {
+    console.warn(`Invalid game state: guesses length ${gameState.guesses.length} doesn't match currentRow ${gameState.currentRow}`);
+    return false;
+  }
+
+  // Validate tileStates array dimensions (6x5)
+  if (gameState.tileStates.length !== 6) {
+    console.warn(`Invalid game state: tileStates should have 6 rows, has ${gameState.tileStates.length}`);
+    return false;
+  }
+
+  for (let i = 0; i < gameState.tileStates.length; i++) {
+    if (!Array.isArray(gameState.tileStates[i]) || gameState.tileStates[i].length !== 5) {
+      console.warn(`Invalid game state: tileStates row ${i} should have 5 columns`);
+      return false;
+    }
+  }
+
+  // Validate each guess contains only valid characters and has correct length
+  const validChars = /^[0-9+\-×÷]*$/;
+  for (let i = 0; i < gameState.guesses.length; i++) {
+    const guess = gameState.guesses[i];
+    if (typeof guess !== 'string') {
+      console.warn(`Invalid game state: guess ${i} is not a string`);
+      return false;
+    }
+    if (guess.length !== 5) {
+      console.warn(`Invalid game state: guess ${i} length is ${guess.length}, should be 5`);
+      return false;
+    }
+    if (!validChars.test(guess)) {
+      console.warn(`Invalid game state: guess ${i} contains invalid characters: ${guess}`);
+      return false;
+    }
+  }
+
+  // Validate currentGuess contains only valid characters and reasonable length
+  if (typeof gameState.currentGuess !== 'string') {
+    console.warn('Invalid game state: currentGuess is not a string');
+    return false;
+  }
+  if (gameState.currentGuess.length > 5) {
+    console.warn(`Invalid game state: currentGuess too long: ${gameState.currentGuess.length}`);
+    return false;
+  }
+  if (!validChars.test(gameState.currentGuess)) {
+    console.warn(`Invalid game state: currentGuess contains invalid characters: ${gameState.currentGuess}`);
+    return false;
+  }
+
+  // Validate tileStates values are only valid TileState enum values
+  const validTileStates: TileState[] = ['correct', 'partial', 'incorrect', 'empty', 'filled'];
+  for (let row = 0; row < gameState.tileStates.length; row++) {
+    for (let col = 0; col < gameState.tileStates[row].length; col++) {
+      const tileState = gameState.tileStates[row][col];
+      if (!validTileStates.includes(tileState)) {
+        console.warn(`Invalid game state: invalid tile state at [${row}][${col}]: ${tileState}`);
+        return false;
+      }
+    }
+  }
+
+  // Validate gameWon/gameLost consistency
+  if (gameState.gameWon && gameState.gameLost) {
+    console.warn('Invalid game state: cannot be both won and lost');
+    return false;
+  }
+
+  // If game is won, validate that there's a winning row
+  if (gameState.gameWon) {
+    let hasWinningRow = false;
+    for (let row = 0; row < gameState.currentRow; row++) {
+      const isWinningRow = gameState.tileStates[row].every(tile => tile === 'correct');
+      if (isWinningRow) {
+        hasWinningRow = true;
+        break;
+      }
+    }
+    if (!hasWinningRow) {
+      console.warn('Invalid game state: marked as won but no winning row found');
+      return false;
+    }
+  }
+
+  // If game is lost, validate that all attempts were used
+  if (gameState.gameLost && gameState.currentRow !== 6) {
+    console.warn(`Invalid game state: marked as lost but only used ${gameState.currentRow} attempts`);
+    return false;
+  }
+
+  return true;
+}
+
+/**
+ * Check if a saved state belongs to the current puzzle (prevent day-old data)
+ */
+export function isCurrentPuzzle(puzzleNumber: number): boolean {
+  const currentPuzzleNumber = getCurrentPuzzleNumber();
+  const isValid = puzzleNumber === currentPuzzleNumber;
+  
+  if (!isValid) {
+    console.warn(`Puzzle number mismatch: saved=${puzzleNumber}, current=${currentPuzzleNumber}`);
+  }
+  
+  return isValid;
+}
+
+/**
+ * Sanitize loaded game state to prevent manipulation
+ * Returns a clean GameState or null if data is invalid
+ */
+export function sanitizeGameState(rawState: any, puzzleNumber: number): GameState | null {
+  // First check if it's for the current puzzle
+  if (!isCurrentPuzzle(puzzleNumber)) {
+    return null;
+  }
+
+  // Validate the structure
+  if (!isValidGameState(rawState)) {
+    return null;
+  }
+
+  // Create a clean copy with only valid GameState properties
+  const sanitizedState: GameState = {
+    currentGuess: String(rawState.currentGuess).slice(0, 5), // Ensure max 5 chars
+    guesses: rawState.guesses.slice(0, 6).map((guess: any) => String(guess).slice(0, 5)), // Max 6 guesses, 5 chars each
+    currentRow: Math.max(0, Math.min(6, Number(rawState.currentRow))), // Clamp to 0-6
+    gameWon: Boolean(rawState.gameWon),
+    gameLost: Boolean(rawState.gameLost),
+    tileStates: rawState.tileStates.slice(0, 6).map((row: any[]) => 
+      row.slice(0, 5).map((tile: any) => {
+        // Ensure only valid tile states
+        const validStates: TileState[] = ['correct', 'partial', 'incorrect', 'empty', 'filled'];
+        return validStates.includes(tile) ? tile : 'empty';
+      })
+    )
+  };
+
+  // Final validation of sanitized state
+  if (!isValidGameState(sanitizedState)) {
+    console.error('Failed to sanitize game state');
+    return null;
+  }
+
+  return sanitizedState;
+}
