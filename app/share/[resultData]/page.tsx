@@ -14,11 +14,6 @@ export async function generateMetadata({
   // Decode the result data from URL (base64 encoded)
   let decodedData;
   try {
-    // 🐛 DEBUG - Log what we're trying to decode
-    console.log('🐛 Share Page Debug - Raw resultData:', resultData);
-    console.log('🐛 Share Page Debug - resultData length:', resultData.length);
-    console.log('🐛 Share Page Debug - resultData type:', typeof resultData);
-
     // Convert URL-safe base64 back to regular base64
     let base64Data = resultData.replace(/-/g, '+').replace(/_/g, '/');
 
@@ -27,16 +22,9 @@ export async function generateMetadata({
       base64Data += '=';
     }
 
-    console.log(
-      '🐛 Share Page Debug - Converted to regular base64:',
-      base64Data
-    );
-
     const decoded = Buffer.from(base64Data, 'base64').toString();
-    console.log('🐛 Share Page Debug - After base64 decode:', decoded);
 
     const rawData = JSON.parse(decoded);
-    console.log('🐛 Share Page Debug - Raw decoded data:', rawData);
 
     // Handle both old and new data formats
     let grid = rawData.grid; // Old format (full emoji grid)
@@ -58,12 +46,7 @@ export async function generateMetadata({
       won: rawData.won !== undefined ? rawData.won : rawData.w,
       compactGrid: rawData.g || '', // Store compact grid for OG image
     };
-    console.log('🐛 Share Page Debug - Final decoded data:', decodedData);
   } catch (e) {
-    // 🐛 DEBUG - Log the error
-    console.error('🐛 Share Page Debug - Decoding failed:', e);
-    console.log('🐛 Share Page Debug - Using fallback data');
-
     // Fallback data if decoding fails
     decodedData = {
       attempts: '6',
@@ -83,8 +66,6 @@ export async function generateMetadata({
   imageUrl.searchParams.set('won', won.toString());
   // Pass compact format instead of emojis to avoid URL encoding corruption
   imageUrl.searchParams.set('compactGrid', compactGrid || '');
-
-  console.log('🐛 Share Page Debug - OG Image URL:', imageUrl.toString());
 
   const frame = {
     version: 'next',

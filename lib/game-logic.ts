@@ -304,8 +304,6 @@ export function generateShareUrl(resultData: ShareResultData): string {
     .replace(/⬛/g, 'I')  // black square (text) -> I  
     .replace(/\n/g, '|'); // newlines -> |
 
-  console.log('🐛 Share Debug - Original grid:', JSON.stringify(resultData.grid));
-  console.log('🐛 Share Debug - Compact grid:', compactGrid);
 
   // Encode minimal result data to keep URL short for Farcaster limits
   const encodedData = Buffer.from(JSON.stringify({

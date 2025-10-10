@@ -18,8 +18,6 @@ const size = {
  */
 export async function GET(request: Request) {
   try {
-    console.log('🐛 OG Debug - Full request URL:', request.url);
-
     // Parse URL parameters
     const { searchParams } = new URL(request.url);
     const attempts = searchParams.get('attempts') || '2';
@@ -30,13 +28,9 @@ export async function GET(request: Request) {
     const colorGrid = [];
     const compactGrid = searchParams.get('compactGrid') || '';
 
-    console.log('🐛 OG Debug - Compact grid received:', compactGrid);
-
     if (compactGrid) {
-      console.log('🐛 OG Debug - Using real compact grid data');
       // Work directly with compact format - don't convert to emojis
       const gridRows = compactGrid.split('|');
-      console.log('🐛 OG Debug - Compact grid rows:', gridRows);
 
       for (let row = 0; row < 6; row++) {
         const rowColors = [];
@@ -45,23 +39,14 @@ export async function GET(request: Request) {
           const compactRow = gridRows[row];
           for (let col = 0; col < 5; col++) {
             const compactChar = compactRow[col] || '';
-            console.log(
-              `🐛 OG Debug - Row ${row}, Col ${col}, Compact: "${compactChar}"`
-            );
             if (compactChar === 'C') {
               rowColors.push('green');
-              console.log(`🐛 OG Debug - Mapped to green`);
             } else if (compactChar === 'P') {
               rowColors.push('yellow');
-              console.log(`🐛 OG Debug - Mapped to yellow`);
             } else if (compactChar === 'I') {
               rowColors.push('gray');
-              console.log(`🐛 OG Debug - Mapped to gray`);
             } else {
               rowColors.push('empty');
-              console.log(
-                `🐛 OG Debug - Mapped to empty (unknown char: "${compactChar}")`
-              );
             }
           }
         } else {
@@ -70,12 +55,9 @@ export async function GET(request: Request) {
             rowColors.push('empty');
           }
         }
-        console.log(`🐛 OG Debug - Row ${row} final colors:`, rowColors);
         colorGrid.push(rowColors);
       }
-      console.log('🐛 OG Debug - Final color grid:', colorGrid);
     } else {
-      console.log('🐛 OG Debug - No grid param, using fallback');
       // Fallback: Generate sample grid (for backwards compatibility)
       for (let row = 0; row < 6; row++) {
         const rowColors = [];
