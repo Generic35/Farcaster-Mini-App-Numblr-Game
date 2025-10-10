@@ -24,26 +24,31 @@ export async function GET(request: Request) {
     const puzzleNumber = searchParams.get('puzzleNumber') || '282';
     const won = searchParams.get('won') === 'true';
 
-    // Parse the actual grid from URL parameters
-    const gridParam = searchParams.get('grid') || '🟩🟩🟩🟩🟩';
-    const gridRows = gridParam.split('\n').filter((row) => row.length > 0);
-
-    // Convert emoji grid to color grid
-    const colorGrid = gridRows.map((row) =>
-      Array.from(row).map((char) => {
-        if (char === '🟩') return 'green';
-        if (char === '🟨') return 'yellow';
-        if (char === '⬜') return 'gray';
-        return 'empty';
-      })
-    );
-
-    // Pad to 6 rows for display
-    while (colorGrid.length < 6) {
-      colorGrid.push(['empty', 'empty', 'empty', 'empty', 'empty']);
+    // Generate a sample grid based on attempts (since we don't pass grid data in URL)
+    const colorGrid = [];
+    for (let row = 0; row < 6; row++) {
+      const rowColors = [];
+      for (let col = 0; col < 5; col++) {
+        if (row < parseInt(attempts) - 1) {
+          // Previous attempts - mix of colors for visual appeal
+          rowColors.push(col % 2 === 0 ? 'gray' : 'yellow');
+        } else if (row === parseInt(attempts) - 1 && won) {
+          // Winning row - all green
+          rowColors.push('green');
+        } else if (row === parseInt(attempts) - 1 && !won) {
+          // Last attempt but didn't win - mix of colors
+          rowColors.push(
+            col % 3 === 0 ? 'green' : col % 3 === 1 ? 'yellow' : 'gray'
+          );
+        } else {
+          // Empty rows
+          rowColors.push('empty');
+        }
+      }
+      colorGrid.push(rowColors);
     }
 
-    // Generate and return the image response
+    // Generate and return the Framedl-style image response
     return new ImageResponse(
       (
         <div
@@ -51,31 +56,37 @@ export async function GET(request: Request) {
             height: '100%',
             width: '100%',
             display: 'flex',
-            backgroundColor: 'white',
-            padding: '40px',
+            justifyContent: 'center',
+            alignItems: 'center',
+            backgroundColor: '#f8f9fa',
+            padding: '32px',
+            gap: '32px',
           }}
         >
-          {/* Left side - Simple grid placeholder */}
+          {/* Left side - Grid */}
           <div
             style={{
               display: 'flex',
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              flex: 1,
             }}
           >
             <div
               style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: '3px',
+                gap: '4px',
+                padding: '24px',
+                border: '1px solid #e5e7eb',
+                borderRadius: '6px',
+                backgroundColor: 'white',
               }}
             >
               {colorGrid.map((row, rowIndex) => (
                 <div
                   key={rowIndex}
-                  style={{ display: 'flex', gap: '3px' }}
+                  style={{ display: 'flex', gap: '4px' }}
                 >
                   {row.map((color, colIndex) => {
                     let backgroundColor = '#f3f4f6';
@@ -89,17 +100,17 @@ export async function GET(request: Request) {
                       backgroundColor = '#d1d5db';
                     } else if (color === 'empty') {
                       backgroundColor = 'white';
-                      border = '1px solid #d1d5db';
+                      border = '2px solid #e5e7eb';
                     }
 
                     return (
                       <div
                         key={colIndex}
                         style={{
-                          width: '28px',
-                          height: '28px',
+                          width: '32px',
+                          height: '32px',
                           backgroundColor,
-                          borderRadius: '3px',
+                          borderRadius: '4px',
                           border,
                         }}
                       />
@@ -117,17 +128,15 @@ export async function GET(request: Request) {
               flexDirection: 'column',
               justifyContent: 'center',
               alignItems: 'center',
-              flex: 1,
-              paddingLeft: '20px',
               textAlign: 'center',
             }}
           >
             <div
               style={{
-                fontSize: 28,
+                fontSize: 32,
                 fontWeight: 800,
                 color: '#000000',
-                marginBottom: '8px',
+                marginBottom: '12px',
                 display: 'flex',
                 justifyContent: 'center',
                 alignItems: 'center',
@@ -139,19 +148,19 @@ export async function GET(request: Request) {
             </div>
             <div
               style={{
-                fontSize: 11,
+                fontSize: 12,
                 color: '#6b7280',
-                marginBottom: '16px',
+                marginBottom: '20px',
               }}
             >
               {new Date().toISOString().split('T')[0]}
             </div>
             <div
               style={{
-                fontSize: 22,
+                fontSize: 24,
                 fontWeight: 700,
-                color: '#16a34a',
-                marginBottom: '16px',
+                color: won ? '#16a34a' : '#dc2626',
+                marginBottom: '20px',
               }}
             >
               {won
@@ -162,7 +171,7 @@ export async function GET(request: Request) {
             </div>
             <div
               style={{
-                fontSize: 16,
+                fontSize: 18,
                 fontWeight: 600,
                 color: '#1f2937',
               }}

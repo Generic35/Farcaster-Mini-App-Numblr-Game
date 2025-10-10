@@ -273,7 +273,7 @@ export function generateShareResultData(
     .map(row => row.map(tileStateToTextEmoji).join(''))
     .join('\n');
 
-  // Generate the shareable text with engaging human-readable format
+  // Generate the shareable text with emoji grid
   const text = gameState.gameWon
     ? `🎲 I just solved Numbler #${puzzleNumber} in ${gameState.currentRow} attempts!\n\nThink you can beat me???\n\n${textGrid}`
     : `🎲 I couldn't solve Numbler #${puzzleNumber} today... better luck next time!\n\nCan you solve it???\n\n${textGrid}`;
@@ -294,15 +294,18 @@ export function getCurrentPuzzleNumber(): number {
 
 // Generate shareable Frame URL
 export function generateShareUrl(resultData: ShareResultData): string {
-  const appUrl = process.env.NEXT_PUBLIC_URL || 'http://localhost:3000';
+  const appUrl = (process.env.NEXT_PUBLIC_URL || 'http://localhost:3000').replace(/\/$/, '');
 
-  // Encode result data as base64 to include in URL
+  // Encode minimal result data to keep URL short for Farcaster limits
   const encodedData = Buffer.from(JSON.stringify({
-    attempts: resultData.attempts,
-    grid: resultData.grid,
-    puzzleNumber: resultData.puzzleNumber,
-    won: resultData.won
-  })).toString('base64');
+    a: resultData.attempts,     // shortened key
+    p: resultData.puzzleNumber, // shortened key  
+    w: resultData.won           // shortened key
+    // grid removed to reduce URL length for Farcaster casting
+  })).toString('base64')
+    .replace(/\+/g, '-')  // Replace + with -
+    .replace(/\//g, '_')  // Replace / with _
+    .replace(/=/g, '');   // Remove padding =
 
   return `${appUrl}/share/${encodedData}`;
 }
