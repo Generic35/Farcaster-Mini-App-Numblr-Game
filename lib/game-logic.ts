@@ -432,7 +432,7 @@ export function isValidGameState(gameState: any): gameState is GameState {
   if (gameState.gameWon) {
     let hasWinningRow = false;
     for (let row = 0; row < gameState.currentRow; row++) {
-      const isWinningRow = gameState.tileStates[row].every(tile => tile === 'correct');
+      const isWinningRow = gameState.tileStates[row].every((tile: string) => tile === 'correct');
       if (isWinningRow) {
         hasWinningRow = true;
         break;
