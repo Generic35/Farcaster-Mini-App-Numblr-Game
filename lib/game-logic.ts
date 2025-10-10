@@ -296,18 +296,29 @@ export function getCurrentPuzzleNumber(): number {
 export function generateShareUrl(resultData: ShareResultData): string {
   const appUrl = (process.env.NEXT_PUBLIC_URL || 'http://localhost:3000').replace(/\/$/, '');
 
+  // Create compact grid representation for OG image
+  const compactGrid = resultData.grid
+    .replace(/🟩/g, 'C')  // green -> C
+    .replace(/🟨/g, 'P')  // yellow -> P  
+    .replace(/⬜/g, 'I')  // white square (OG image) -> I
+    .replace(/⬛/g, 'I')  // black square (text) -> I  
+    .replace(/\n/g, '|'); // newlines -> |
+
+  console.log('🐛 Share Debug - Original grid:', JSON.stringify(resultData.grid));
+  console.log('🐛 Share Debug - Compact grid:', compactGrid);
+
   // Encode minimal result data to keep URL short for Farcaster limits
   const encodedData = Buffer.from(JSON.stringify({
     a: resultData.attempts,     // shortened key
     p: resultData.puzzleNumber, // shortened key  
-    w: resultData.won           // shortened key
-    // grid removed to reduce URL length for Farcaster casting
+    w: resultData.won,          // shortened key
+    g: compactGrid              // compact grid for OG image
   })).toString('base64')
     .replace(/\+/g, '-')  // Replace + with -
     .replace(/\//g, '_')  // Replace / with _
     .replace(/=/g, '');   // Remove padding =
 
-  return `${appUrl}/share/${encodedData}`;
+  return `${appUrl}/share/${encodedData}?v=2`; // Cache busting for fixed OG images
 }
 
 // ===== VALIDATION FUNCTIONS FOR PERSISTENCE =====
@@ -450,11 +461,11 @@ export function isValidGameState(gameState: any): gameState is GameState {
 export function isCurrentPuzzle(puzzleNumber: number): boolean {
   const currentPuzzleNumber = getCurrentPuzzleNumber();
   const isValid = puzzleNumber === currentPuzzleNumber;
-  
+
   if (!isValid) {
     console.warn(`Puzzle number mismatch: saved=${puzzleNumber}, current=${currentPuzzleNumber}`);
   }
-  
+
   return isValid;
 }
 
@@ -480,7 +491,7 @@ export function sanitizeGameState(rawState: any, puzzleNumber: number): GameStat
     currentRow: Math.max(0, Math.min(6, Number(rawState.currentRow))), // Clamp to 0-6
     gameWon: Boolean(rawState.gameWon),
     gameLost: Boolean(rawState.gameLost),
-    tileStates: rawState.tileStates.slice(0, 6).map((row: any[]) => 
+    tileStates: rawState.tileStates.slice(0, 6).map((row: any[]) =>
       row.slice(0, 5).map((tile: any) => {
         // Ensure only valid tile states
         const validStates: TileState[] = ['correct', 'partial', 'incorrect', 'empty', 'filled'];

@@ -18,34 +18,86 @@ const size = {
  */
 export async function GET(request: Request) {
   try {
+    console.log('🐛 OG Debug - Full request URL:', request.url);
+
     // Parse URL parameters
     const { searchParams } = new URL(request.url);
     const attempts = searchParams.get('attempts') || '2';
     const puzzleNumber = searchParams.get('puzzleNumber') || '282';
     const won = searchParams.get('won') === 'true';
 
-    // Generate a sample grid based on attempts (since we don't pass grid data in URL)
+    // Parse real grid data or generate fallback
     const colorGrid = [];
-    for (let row = 0; row < 6; row++) {
-      const rowColors = [];
-      for (let col = 0; col < 5; col++) {
-        if (row < parseInt(attempts) - 1) {
-          // Previous attempts - mix of colors for visual appeal
-          rowColors.push(col % 2 === 0 ? 'gray' : 'yellow');
-        } else if (row === parseInt(attempts) - 1 && won) {
-          // Winning row - all green
-          rowColors.push('green');
-        } else if (row === parseInt(attempts) - 1 && !won) {
-          // Last attempt but didn't win - mix of colors
-          rowColors.push(
-            col % 3 === 0 ? 'green' : col % 3 === 1 ? 'yellow' : 'gray'
-          );
+    const compactGrid = searchParams.get('compactGrid') || '';
+
+    console.log('🐛 OG Debug - Compact grid received:', compactGrid);
+
+    if (compactGrid) {
+      console.log('🐛 OG Debug - Using real compact grid data');
+      // Work directly with compact format - don't convert to emojis
+      const gridRows = compactGrid.split('|');
+      console.log('🐛 OG Debug - Compact grid rows:', gridRows);
+
+      for (let row = 0; row < 6; row++) {
+        const rowColors = [];
+        if (row < gridRows.length && gridRows[row]) {
+          // Parse compact format directly
+          const compactRow = gridRows[row];
+          for (let col = 0; col < 5; col++) {
+            const compactChar = compactRow[col] || '';
+            console.log(
+              `🐛 OG Debug - Row ${row}, Col ${col}, Compact: "${compactChar}"`
+            );
+            if (compactChar === 'C') {
+              rowColors.push('green');
+              console.log(`🐛 OG Debug - Mapped to green`);
+            } else if (compactChar === 'P') {
+              rowColors.push('yellow');
+              console.log(`🐛 OG Debug - Mapped to yellow`);
+            } else if (compactChar === 'I') {
+              rowColors.push('gray');
+              console.log(`🐛 OG Debug - Mapped to gray`);
+            } else {
+              rowColors.push('empty');
+              console.log(
+                `🐛 OG Debug - Mapped to empty (unknown char: "${compactChar}")`
+              );
+            }
+          }
         } else {
           // Empty rows
-          rowColors.push('empty');
+          for (let col = 0; col < 5; col++) {
+            rowColors.push('empty');
+          }
         }
+        console.log(`🐛 OG Debug - Row ${row} final colors:`, rowColors);
+        colorGrid.push(rowColors);
       }
-      colorGrid.push(rowColors);
+      console.log('🐛 OG Debug - Final color grid:', colorGrid);
+    } else {
+      console.log('🐛 OG Debug - No grid param, using fallback');
+      // Fallback: Generate sample grid (for backwards compatibility)
+      for (let row = 0; row < 6; row++) {
+        const rowColors = [];
+        for (let col = 0; col < 5; col++) {
+          if (row < parseInt(attempts) - 1) {
+            // Previous attempts - pattern matching your game (gray-green-gray-green-gray)
+            rowColors.push(col % 2 === 0 ? 'gray' : 'green');
+          } else if (row === parseInt(attempts) - 1 && won) {
+            // Winning row - all green
+            rowColors.push('green');
+          } else if (row === parseInt(attempts) - 1 && !won) {
+            // Last attempt but didn't win - mix of colors
+            rowColors.push(
+              col % 3 === 0 ? 'green' : col % 3 === 1 ? 'yellow' : 'gray'
+            );
+          } else {
+            // Empty rows
+            rowColors.push('empty');
+          }
+        }
+        colorGrid.push(rowColors);
+      }
     }
 
     // Generate and return the Framedl-style image response

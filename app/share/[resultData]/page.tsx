@@ -39,11 +39,24 @@ export async function generateMetadata({
     console.log('🐛 Share Page Debug - Raw decoded data:', rawData);
 
     // Handle both old and new data formats
+    let grid = rawData.grid; // Old format (full emoji grid)
+
+    // If no old format grid, decode compact format
+    if (!grid && rawData.g) {
+      // Decode compact grid format: C=correct, P=partial, I=incorrect, |=newline
+      grid = rawData.g
+        .replace(/C/g, '🟩') // C -> green
+        .replace(/P/g, '🟨') // P -> yellow
+        .replace(/I/g, '⬜') // I -> gray
+        .replace(/\|/g, '\n'); // | -> newlines
+    }
+
     decodedData = {
       attempts: rawData.attempts || rawData.a,
-      grid: rawData.grid || '🟩🟩🟩🟩🟩', // fallback since we removed grid
+      grid: grid || '🟩🟩🟩🟩🟩', // fallback only if no grid data at all
       puzzleNumber: rawData.puzzleNumber || rawData.p,
       won: rawData.won !== undefined ? rawData.won : rawData.w,
+      compactGrid: rawData.g || '', // Store compact grid for OG image
     };
     console.log('🐛 Share Page Debug - Final decoded data:', decodedData);
   } catch (e) {
@@ -57,17 +70,21 @@ export async function generateMetadata({
       grid: '🟩🟨⬜⬜⬜',
       puzzleNumber: '1',
       won: false,
+      compactGrid: '', // No compact grid in fallback
     };
   }
 
-  const { attempts, grid, puzzleNumber, won } = decodedData;
+  const { attempts, grid, puzzleNumber, won, compactGrid } = decodedData;
 
-  // Build the OG image URL with minimal parameters (no grid to avoid URL length limits)
+  // Build the OG image URL with compact grid data (avoid emoji URL encoding issues)
   const imageUrl = new URL(`${appUrl}/api/og/result`);
   imageUrl.searchParams.set('attempts', attempts.toString());
   imageUrl.searchParams.set('puzzleNumber', puzzleNumber.toString());
   imageUrl.searchParams.set('won', won.toString());
-  // Grid parameter removed to stay under Farcaster's URL length limit (~350 chars)
+  // Pass compact format instead of emojis to avoid URL encoding corruption
+  imageUrl.searchParams.set('compactGrid', compactGrid || '');
+
+  console.log('🐛 Share Page Debug - OG Image URL:', imageUrl.toString());
 
   const frame = {
     version: 'next',
